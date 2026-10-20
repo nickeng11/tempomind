@@ -432,12 +432,10 @@ export function buildPlan(goal: string, deadline: string, start: string, options
     let milestoneTitle = phases.join(' → ') || 'Buffer & catch-up';
     if (phases.length === 1 && phases[0] === previousPhase) milestoneTitle += ', continued';
     if (phases.length) previousPhase = phases[phases.length - 1];
-    const lastTask = regular[regular.length - 1];
     return {
       id,
       week: i + 1,
       title: milestoneTitle,
-      deliverable: lastTask ? lastTask.title.replace(/\s*\(\d+\/\d+\)$/, '') : 'Catch up and rest',
       startDate: first,
       endDate: last,
     };
@@ -468,7 +466,6 @@ export function buildPlan(goal: string, deadline: string, start: string, options
       id: uid(),
       goal: goal.trim(),
       title,
-      category: domain.label,
       startDate: start,
       deadline: end,
       createdAt: Date.now(),

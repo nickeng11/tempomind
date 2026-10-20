@@ -70,7 +70,7 @@ function MilestoneItem({ milestone: m, tasks, open, onToggle, projectId, today }
           <span className="text-xs text-muted">
             {formatDate(m.startDate)} – {formatDate(m.endDate)}
           </span>
-          {m.status === 'current' && <Pill tone="indigo">This week</Pill>}
+          {m.status === 'current' && <Pill tone="accent">This week</Pill>}
           {m.status === 'late' && <Pill tone="amber">Running over</Pill>}
           <ChevronDown className={cn('ml-auto size-4 text-muted transition-transform duration-200', open && 'rotate-180')} />
         </div>
@@ -88,7 +88,7 @@ function MilestoneItem({ milestone: m, tasks, open, onToggle, projectId, today }
               <div key={day} className="mt-3">
                 <p className="mb-1 flex items-center gap-2 text-xs font-medium text-muted">
                   {formatDate(day, true)}
-                  {day === today && <Pill tone="indigo">Today</Pill>}
+                  {day === today && <Pill tone="accent">Today</Pill>}
                 </p>
                 <ul>
                   {tasks

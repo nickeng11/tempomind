@@ -15,7 +15,7 @@ export function SharePage({ project, today }: { project: Project | undefined; to
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between gap-3 px-4">
           <Logo />
           <div className="flex items-center gap-2">
-            <Pill tone="indigo">
+            <Pill tone="accent">
               <Eye className="size-3" /> Shared · View-only
             </Pill>
             <PalettePicker />

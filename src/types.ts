@@ -23,7 +23,6 @@ export interface Milestone {
   id: string;
   week: number;
   title: string;
-  deliverable: string;
   startDate: string;
   endDate: string;
 }
@@ -49,7 +48,6 @@ export interface Project {
   id: string;
   goal: string;
   title: string;
-  category: string;
   startDate: string;
   deadline: string;
   createdAt: number;

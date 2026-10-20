@@ -148,7 +148,7 @@ function UnitRow({ unit, index, stepsMode, defaultOpen, projectId, onToggle, onF
               {formatDuration(unit.minutes)}
             </span>
             {unit.tag === 'overdue' && <Pill tone="amber">Carried over</Pill>}
-            {unit.tag === 'stretch' && <Pill tone="violet">Stretch · planned {formatDate(unit.date)}</Pill>}
+            {unit.tag === 'stretch' && <Pill tone="accent2">Stretch · planned {formatDate(unit.date)}</Pill>}
             {steps && (
               <button type="button" onClick={() => setOpen((o) => !o)} className="inline-flex items-center gap-0.5 rounded px-1 tabular-nums hover:text-base-800 dark:hover:text-base-200">
                 {stepsDone}/{steps.length} steps

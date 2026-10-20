@@ -39,12 +39,6 @@ export function weekStart(s: string): string {
   return addDays(s, -((day + 6) % 7));
 }
 
-/** Weekdays in [from, to], inclusive. */
-export function countWorkdays(from: string, to: string): number {
-  let n = 0;
-  for (let d = from; d <= to; d = addDays(d, 1)) if (!isWeekend(d)) n++;
-  return n;
-}
 
 export function formatDate(s: string, withWeekday = false): string {
   return parseISODate(s).toLocaleDateString('en-US', {

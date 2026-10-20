@@ -4,32 +4,28 @@ import { isTaskDone, taskMinutes } from './metrics';
 
 export const ENERGY_LEVELS: Energy[] = ['high', 'steady', 'low', 'fried'];
 
-export const ENERGY_META: Record<Energy, { emoji: string; label: string; blurb: string; mode: string; sessionMin: number }> = {
+export const ENERGY_META: Record<Energy, { emoji: string; label: string; mode: string; sessionMin: number }> = {
   high: {
     emoji: '⚡',
     label: 'High Focus',
-    blurb: "You're sharp. Today shows full deep-work blocks, plus a stretch task if you finish early.",
     mode: 'Deep-work blocks + a stretch task',
     sessionMin: 90,
   },
   steady: {
     emoji: '🟢',
     label: 'Steady',
-    blurb: "Today's plan as scheduled, with each task's steps laid out.",
     mode: "Today's plan, as scheduled",
     sessionMin: 50,
   },
   low: {
     emoji: '🔋',
     label: 'Low Energy',
-    blurb: 'Tasks are re-sliced into ~20-minute chunks. Two stay in focus; the rest are parked without moving any deadline.',
     mode: 'Re-sliced into ~20-min chunks',
     sessionMin: 25,
   },
   fried: {
     emoji: '🔥',
     label: 'Fried / Overwhelmed',
-    blurb: "Everything else is tucked away. You'll see one tiny next step at a time, and that's enough.",
     mode: 'One tiny step at a time',
     sessionMin: 10,
   },

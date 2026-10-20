@@ -5,11 +5,11 @@ export type PaceStatus = 'ahead' | 'on-track' | 'behind' | 'done';
 export type MilestoneStatus = 'done' | 'current' | 'upcoming' | 'late';
 
 export const taskMinutes = (t: Task) => t.steps.reduce((n, s) => n + s.minutes, 0);
-export const taskDoneMinutes = (t: Task) => t.steps.reduce((n, s) => n + (s.done ? s.minutes : 0), 0);
+const taskDoneMinutes = (t: Task) => t.steps.reduce((n, s) => n + (s.done ? s.minutes : 0), 0);
 export const isTaskDone = (t: Task) => t.steps.every((s) => s.done);
 
 /** Whole-number percent that only reads 100 when the work is actually finished. */
-export function percentOf(part: number, whole: number): number {
+function percentOf(part: number, whole: number): number {
   if (!whole) return 0;
   if (part >= whole) return 100;
   return Math.min(99, Math.round((part / whole) * 100));
@@ -65,8 +65,6 @@ export interface PublicSession {
 export interface PublicProjectView {
   id: string;
   title: string;
-  category: string;
-  startDate: string;
   deadline: string;
   daysLeft: number;
   totalMin: number;
@@ -81,7 +79,6 @@ export interface PublicProjectView {
   projectedFinish: string;
   /** Parent task title only. Micro-steps are never exposed, since their size hints at energy. */
   activeTask: string | null;
-  activeMilestone: string | null;
   session: PublicSession | null;
   milestones: MilestoneProgress[];
   completedAt: number | null;
@@ -110,8 +107,6 @@ export function toPublicView(p: Project, today: string, now: number): PublicProj
   return {
     id: p.id,
     title: p.title,
-    category: p.category,
-    startDate: p.startDate,
     deadline: p.deadline,
     daysLeft: diffDays(today, p.deadline),
     totalMin,
@@ -124,7 +119,6 @@ export function toPublicView(p: Project, today: string, now: number): PublicProj
     slipDays,
     projectedFinish: paceStatus === 'done' ? today : shiftWorkdays(lastPlannedDay, slipDays),
     activeTask: active?.title ?? null,
-    activeMilestone: p.milestones.find((m) => m.id === active?.milestoneId)?.title ?? null,
     session: liveSession && sessionTask ? { taskTitle: sessionTask.title, startedAt: liveSession.startedAt, durationMin: liveSession.durationMin } : null,
     milestones: milestoneProgress(p, today),
     completedAt: p.completedAt ?? null,

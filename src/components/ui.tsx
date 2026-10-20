@@ -1,7 +1,6 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Activity, Check as CheckIcon, Link2, ShieldCheck } from 'lucide-react';
-import { useState } from 'react';
 import type { PaceStatus } from '../lib/metrics';
 import { formatHours } from '../lib/dates';
 
@@ -28,31 +27,12 @@ export function Card({ className, children }: { className?: string; children: Re
   );
 }
 
-export function CardHeader({ icon, title, subtitle, action }: { icon?: ReactNode; title: ReactNode; subtitle?: ReactNode; action?: ReactNode }) {
-  return (
-    <div className="flex items-start justify-between gap-4 px-5 pt-5">
-      <div className="flex min-w-0 items-start gap-3">
-        {icon && (
-          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent-50 text-accent-600 dark:bg-accent-500/10 dark:text-accent-300">
-            {icon}
-          </div>
-        )}
-        <div className="min-w-0">
-          <h2 className="text-[15px] font-semibold tracking-tight">{title}</h2>
-          {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}
-        </div>
-      </div>
-      {action && <div className="shrink-0">{action}</div>}
-    </div>
-  );
-}
-
-type Tone = 'neutral' | 'indigo' | 'violet' | 'emerald' | 'amber';
+type Tone = 'neutral' | 'accent' | 'accent2' | 'emerald' | 'amber';
 
 const TONES: Record<Tone, string> = {
   neutral: 'bg-base-100 text-base-600 dark:bg-base-800 dark:text-base-300',
-  indigo: 'bg-accent-50 text-accent-700 dark:bg-accent-500/15 dark:text-accent-300',
-  violet: 'bg-accent2-50 text-accent2-700 dark:bg-accent2-500/15 dark:text-accent2-300',
+  accent: 'bg-accent-50 text-accent-700 dark:bg-accent-500/15 dark:text-accent-300',
+  accent2: 'bg-accent2-50 text-accent2-700 dark:bg-accent2-500/15 dark:text-accent2-300',
   emerald: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
   amber: 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
 };
@@ -69,12 +49,12 @@ export function PacePill({ status, deltaMin }: { status: PaceStatus; deltaMin: n
   if (status === 'done') return <Pill tone="emerald">Complete</Pill>;
   if (status === 'ahead') return <Pill tone="emerald">{formatHours(deltaMin)} ahead of pace</Pill>;
   if (status === 'behind') return <Pill tone="amber">{formatHours(-deltaMin)} behind pace</Pill>;
-  return <Pill tone="indigo">On pace</Pill>;
+  return <Pill tone="accent">On pace</Pill>;
 }
 
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
 
-export function ProgressBar({ value, marker, size = 'md', label = 'Progress', className }: { value: number; marker?: number; size?: 'sm' | 'md' | 'lg'; label?: string; className?: string }) {
+export function ProgressBar({ value, size = 'md', label = 'Progress', className }: { value: number; size?: 'sm' | 'md' | 'lg'; label?: string; className?: string }) {
   return (
     <div
       role="progressbar"
@@ -88,13 +68,6 @@ export function ProgressBar({ value, marker, size = 'md', label = 'Progress', cl
         className="h-full rounded-full bg-linear-to-r from-accent-500 to-accent2-500 transition-[width] duration-700 ease-out"
         style={{ width: `${clamp(value)}%` }}
       />
-      {marker !== undefined && (
-        <div
-          title="Planned pace"
-          className="absolute -inset-y-1 w-0.5 rounded-full bg-base-800 transition-[left] duration-700 dark:bg-base-200"
-          style={{ left: `calc(${clamp(marker)}% - 1px)` }}
-        />
-      )}
     </div>
   );
 }
@@ -200,7 +173,7 @@ export function ViewOnlyNotice() {
   );
 }
 
-export function shareUrl(projectId: string): string {
+function shareUrl(projectId: string): string {
   return `${window.location.origin}${window.location.pathname}#/share/${projectId}`;
 }
 
