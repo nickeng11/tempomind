@@ -117,6 +117,11 @@ export const actions = {
     updateProject(projectId, (p) => ({ ...p, session: null }));
   },
 
+  /** Human-confirmed completion. Only allowed once every sub-task is done. */
+  completeProject(projectId: string) {
+    updateProject(projectId, (p) => (p.tasks.every((t) => t.steps.every((s) => s.done)) ? { ...p, session: null, completedAt: Date.now() } : p));
+  },
+
   setEnergy(energy: Energy | null) {
     state = { ...state, owner: { energy, energyDate: todayISO() } };
     write(PRIVATE_KEY, state.owner);

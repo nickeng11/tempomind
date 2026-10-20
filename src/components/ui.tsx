@@ -178,11 +178,11 @@ export function CountdownRing({ session, now, size = 56, children }: { session: 
 
 export function Logo() {
   return (
-    <a href="#/" className="flex items-center gap-2.5">
+    <a href="#/" className="flex shrink-0 items-center gap-2.5" aria-label="TempoMind home">
       <span className="grid size-8 place-items-center rounded-xl bg-linear-to-br from-accent-500 to-accent2-600 text-white shadow-md shadow-accent-500/30">
-        <Activity className="size-4.5" strokeWidth={2.5} />
+        <Activity className="size-4.5" strokeWidth={2.5} aria-hidden="true" />
       </span>
-      <span className="text-[17px] font-semibold tracking-tight">
+      <span className="hidden text-[17px] font-semibold tracking-tight sm:inline">
         Tempo<span className="bg-linear-to-r from-accent-500 to-accent2-500 bg-clip-text text-transparent">Mind</span>
       </span>
     </a>

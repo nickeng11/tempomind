@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Plus, RotateCcw, X } from 'lucide-react';
+import { CircleCheckBig, PartyPopper, Plus, RotateCcw, X } from 'lucide-react';
 import type { OwnerPrivateState, Project } from '../types';
 import { daysLeftLabel, formatDate } from '../lib/dates';
 import { useNow, useRememberedId } from '../lib/hooks';
@@ -10,7 +10,8 @@ import { EnergyCard } from './EnergyCard';
 import { GoalComposer } from './GoalComposer';
 import { PlanTimeline } from './PlanTimeline';
 import { TodayPanel } from './TodayPanel';
-import { btnSecondary, Card, cn, PacePill, ProgressBar, ShareLinkButton } from './ui';
+import { CompleteDialog } from './CompleteDialog';
+import { btnPrimary, btnSecondary, Card, cn, PacePill, ProgressBar, ShareLinkButton } from './ui';
 
 export function OwnerView({ projects, owner, today }: { projects: Project[]; owner: OwnerPrivateState; today: string }) {
   const [selectedId, setSelectedId] = useRememberedId('tempomind.selected-project');
@@ -113,6 +114,9 @@ function ProjectTabs({ projects, selectedId, onSelect }: { projects: Project[]; 
 
 function ProjectHeader({ project, today }: { project: Project; today: string }) {
   const view = toPublicView(project, today, useNow(30_000));
+  const [confirming, setConfirming] = useState(false);
+  const allDone = view.percent === 100;
+
   return (
     <Card className="p-5">
       <div className="flex items-start justify-between gap-4">
@@ -129,6 +133,31 @@ function ProjectHeader({ project, today }: { project: Project; today: string }) 
         <span className="shrink-0 text-sm font-semibold tabular-nums">{view.percent}%</span>
         <PacePill status={view.paceStatus} deltaMin={view.paceDeltaMin} />
       </div>
+
+      <AnimatePresence initial={false}>
+        {allDone && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+            <div className="mt-4 flex flex-col gap-3 rounded-xl bg-emerald-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:bg-emerald-500/10">
+              <p className="flex items-center gap-2 text-sm font-medium text-emerald-800 dark:text-emerald-200">
+                <PartyPopper className="size-4 shrink-0" aria-hidden="true" /> Every task is done. Ready to close this goal?
+              </p>
+              <button type="button" onClick={() => setConfirming(true)} className={cn(btnPrimary, 'shrink-0')}>
+                <CircleCheckBig className="size-4" aria-hidden="true" /> Mark for completion
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <CompleteDialog
+        project={project}
+        open={confirming}
+        onCancel={() => setConfirming(false)}
+        onConfirm={() => {
+          setConfirming(false);
+          actions.completeProject(project.id);
+        }}
+      />
     </Card>
   );
 }

@@ -84,6 +84,7 @@ export interface PublicProjectView {
   activeMilestone: string | null;
   session: PublicSession | null;
   milestones: MilestoneProgress[];
+  completedAt: number | null;
 }
 
 export function toPublicView(p: Project, today: string, now: number): PublicProjectView {
@@ -126,6 +127,7 @@ export function toPublicView(p: Project, today: string, now: number): PublicProj
     activeMilestone: p.milestones.find((m) => m.id === active?.milestoneId)?.title ?? null,
     session: liveSession && sessionTask ? { taskTitle: sessionTask.title, startedAt: liveSession.startedAt, durationMin: liveSession.durationMin } : null,
     milestones: milestoneProgress(p, today),
+    completedAt: p.completedAt ?? null,
   };
 }
 

@@ -42,5 +42,16 @@ export function createDemoProjects(today: string): Project[] {
     return t;
   });
 
-  return [roadmap, beta];
+  // Every task done but not yet confirmed, ready to demo "Mark for completion".
+  const updateDue = addDays(today, 3);
+  const update = buildPlan(`Write the Q3 investor update by ${formatDate(updateDue)}`, updateDue, addDays(today, -6), { size: 'small', hoursPerWeek: 8 }).project;
+  update.tasks = update.tasks.map((t) => complete(t, t.date < today ? t.date : today));
+
+  // Already confirmed complete, so the Completed Goals page isn't empty.
+  const offsiteDue = addDays(today, -5);
+  const offsite = buildPlan(`Organize the team offsite by ${formatDate(offsiteDue)}`, offsiteDue, addDays(today, -26), { size: 'small', hoursPerWeek: 4 }).project;
+  offsite.tasks = offsite.tasks.map((t) => complete(t, t.date));
+  offsite.completedAt = at(addDays(today, -7), 16);
+
+  return [roadmap, beta, update, offsite];
 }

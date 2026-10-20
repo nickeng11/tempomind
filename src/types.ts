@@ -58,6 +58,8 @@ export interface Project {
   session: WorkSession | null;
   /** Missing on projects created before effort sizing existed. */
   effort?: EffortPlan;
+  /** Set when the owner confirms completion. The project then becomes read-only. */
+  completedAt?: number;
 }
 
 /**

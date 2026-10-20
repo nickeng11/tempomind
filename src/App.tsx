@@ -1,17 +1,18 @@
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
-import { Header } from './components/Header';
+import { Header, type View } from './components/Header';
 import { OwnerView } from './components/OwnerView';
 import { SharePage } from './components/SharePage';
-import { TeamView } from './components/TeamView';
+import { CompletedView, TeamView } from './components/TeamView';
 import { useHash, useToday } from './lib/hooks';
 import { useAppState } from './lib/store';
 
-type Route = { name: 'owner' } | { name: 'team' } | { name: 'share'; projectId: string };
+type Route = { name: View } | { name: 'share'; projectId: string };
 
 function parseRoute(hash: string): Route {
   const share = hash.match(/^#\/share\/([\w-]+)/);
   if (share) return { name: 'share', projectId: share[1] };
   if (hash.startsWith('#/team')) return { name: 'team' };
+  if (hash.startsWith('#/completed')) return { name: 'completed' };
   return { name: 'owner' };
 }
 
@@ -43,6 +44,10 @@ function Routes() {
     return <SharePage project={projects.find((p) => p.id === route.projectId)} today={today} />;
   }
 
+  // Confirmed-complete goals leave the workspace and team view for the read-only archive.
+  const active = projects.filter((p) => !p.completedAt);
+  const completed = projects.filter((p) => p.completedAt);
+
   return (
     <div className="bg-app-glow min-h-screen">
       <Header view={route.name} />
@@ -56,10 +61,12 @@ function Routes() {
             transition={{ duration: 0.2 }}
           >
             {route.name === 'team' ? (
-              // The owner's private state is intentionally not passed to the team view.
-              <TeamView projects={projects} today={today} />
+              // The owner's private state is intentionally not passed to the team views.
+              <TeamView projects={active} completedCount={completed.length} today={today} />
+            ) : route.name === 'completed' ? (
+              <CompletedView projects={completed} today={today} />
             ) : (
-              <OwnerView projects={projects} owner={owner} today={today} />
+              <OwnerView projects={active} owner={owner} today={today} />
             )}
           </motion.div>
         </AnimatePresence>

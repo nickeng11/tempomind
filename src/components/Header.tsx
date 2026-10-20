@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Check as CheckIcon, Moon, Sun, User, Users } from 'lucide-react';
+import { Check as CheckIcon, CircleCheckBig, Moon, Sun, User, Users } from 'lucide-react';
 import { applyPalette, currentPalette, PALETTES, type PaletteId } from '../lib/palettes';
 import { cn, Logo } from './ui';
 
@@ -83,9 +83,12 @@ export function PalettePicker() {
 const VIEWS = [
   { id: 'owner', href: '#/', label: 'My Workspace', short: 'Me', icon: User },
   { id: 'team', href: '#/team', label: 'Team View', short: 'Team', icon: Users },
+  { id: 'completed', href: '#/completed', label: 'Completed Goals', short: 'Done', icon: CircleCheckBig },
 ] as const;
 
-export function Header({ view }: { view: 'owner' | 'team' }) {
+export type View = (typeof VIEWS)[number]['id'];
+
+export function Header({ view }: { view: View }) {
   return (
     <header className="sticky top-0 z-30 border-b border-base-200/70 bg-white/70 backdrop-blur-xl dark:border-base-800/70 dark:bg-base-950/70">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
