@@ -54,7 +54,7 @@ export function PacePill({ status, deltaMin }: { status: PaceStatus; deltaMin: n
 
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
 
-export function ProgressBar({ value, size = 'md', label = 'Progress', className }: { value: number; size?: 'sm' | 'md' | 'lg'; label?: string; className?: string }) {
+export function ProgressBar({ value, size = 'lg', label = 'Progress', className }: { value: number; size?: 'sm' | 'lg'; label?: string; className?: string }) {
   return (
     <div
       role="progressbar"
@@ -62,7 +62,7 @@ export function ProgressBar({ value, size = 'md', label = 'Progress', className 
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(clamp(value))}
-      className={cn('relative w-full rounded-full bg-base-200/80 dark:bg-base-800', size === 'sm' ? 'h-1.5' : size === 'lg' ? 'h-3' : 'h-2', className)}
+      className={cn('relative w-full rounded-full bg-base-200/80 dark:bg-base-800', size === 'sm' ? 'h-1.5' : 'h-3', className)}
     >
       <div
         className="h-full rounded-full bg-linear-to-r from-accent-500 to-accent2-500 transition-[width] duration-700 ease-out"

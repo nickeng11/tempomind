@@ -16,7 +16,11 @@ function complete(t: Task, doneOn: string, count = t.steps.length, doneBy?: stri
   };
 }
 
-/** Two in-flight projects so the demo opens with realistic, live-looking numbers. */
+/**
+ * Four goals so every feature has something to show: one slightly behind with
+ * a live focus session and collaborator work, one ahead, one ready to mark
+ * complete and one already completed.
+ */
 export function createDemoProjects(today: string): Project[] {
   // Slightly behind pace, with a focus session already running.
   const roadmapDue = addDays(today, 18);
