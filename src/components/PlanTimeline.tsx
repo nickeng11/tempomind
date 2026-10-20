@@ -5,6 +5,7 @@ import type { Project, Task } from '../types';
 import { formatDate, formatDuration, formatHours } from '../lib/dates';
 import { isTaskDone, milestoneProgress, taskMinutes, type MilestoneProgress } from '../lib/metrics';
 import { actions } from '../lib/store';
+import { CollaboratorBadges } from './CollaboratorBadge';
 import { Card, Check, cn, Pill, ProgressBar } from './ui';
 
 interface PlanTimelineProps {
@@ -152,7 +153,7 @@ function TaskRow({ task: t, onToggle }: { task: Task; onToggle?: (t: Task) => vo
         </span>
       )}
       <span className={cn('min-w-0 flex-1 text-sm transition-colors', done ? 'text-muted line-through' : 'text-base-700 dark:text-base-300')}>{t.title}</span>
-      {collaborators.length > 0 && <CollaboratorMark names={collaborators} />}
+      {collaborators.length > 0 && <CollaboratorBadges names={collaborators} />}
       {!done && stepsDone > 0 && (
         <span className="text-xs tabular-nums text-accent-600 dark:text-accent-300">
           {stepsDone}/{t.steps.length}
@@ -160,20 +161,5 @@ function TaskRow({ task: t, onToggle }: { task: Task; onToggle?: (t: Task) => vo
       )}
       <span className="text-xs tabular-nums text-muted">{formatDuration(taskMinutes(t))}</span>
     </li>
-  );
-}
-
-/** A small white circle on work completed via a collaborator link; shows who on hover or keyboard focus. */
-function CollaboratorMark({ names }: { names: string[] }) {
-  const label = `Completed by ${names.join(' & ')}`;
-  return (
-    <span tabIndex={0} aria-label={label} className="group/mark relative size-3 shrink-0 rounded-full border-[1.5px] border-base-500 bg-white shadow-sm outline-offset-2 dark:border-base-300">
-      <span
-        role="tooltip"
-        className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 whitespace-nowrap rounded-md bg-base-900 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover/mark:opacity-100 group-focus/mark:opacity-100 dark:bg-white dark:text-base-900"
-      >
-        {label}
-      </span>
-    </span>
   );
 }
