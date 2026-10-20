@@ -101,7 +101,7 @@ export function TeamProjectCard({ view, now, shareable = false }: { view: Public
             <Lock className="size-3" aria-hidden="true" /> View only
           </span>
         ) : (
-          shareable && <ShareLinkButton projectId={view.id} compact />
+          shareable && <ShareLinkButton code={view.viewLink} compact />
         )}
       </div>
 

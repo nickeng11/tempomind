@@ -19,7 +19,8 @@ npm run build    # type-check + production build
 - **Team view (view-only):** current task, % complete, live session countdown and a weekly timeline. Pace and hours worked vs. planned are deliberately not shared, since day-to-day output can hint at someone's energy; the owner still sees their own pace in My Workspace.
 - **Human-in-the-loop completion:** at 100% a goal shows **Mark for completion**; after confirming, it's locked and greyed out in the **Completed** menu beside your project tabs, and listed on the read-only **Completed Goals** page. Unticking it (and confirming) makes it live again.
 - **Collaborator links:** **Copy collaborator link** in My Workspace gives someone access to that one goal only: its completion bar and pacing plan, where they can tick tasks off. They enter their name once (browsers can't read a computer's account name), and anything they complete shows their initials badge in the pacing plan (a consistent, accessible colour per person) with "Completed by [name]" on hover or keyboard focus. They never see the owner's energy status, today plan, pace or hours.
-- **Team links:** `#/share/<projectId>` opens a standalone, view-only progress page. Both kinds of link update live in other tabs of the same browser.
+- **View-only links:** from the Team View page, a standalone progress page anyone can read but not change. Both kinds of link update live in other tabs of the same browser.
+- **Separate, unguessable link codes:** every goal has its own random 128-bit code for each kind of link, and neither is the goal's internal id. Editing a view-only link's URL into a collaborator link finds nothing, and team pages never receive the collaborator code.
 - **Colour schemes & dark mode:** five palettes, generated from Tailwind's colour scales (`npm run palettes`).
 
 ## Accessibility

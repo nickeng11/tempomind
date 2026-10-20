@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { Activity, Check as CheckIcon, Link2, ShieldCheck, UserPlus } from 'lucide-react';
+import { Activity, Check as CheckIcon, Eye, ShieldCheck, UserPlus } from 'lucide-react';
 import type { PaceStatus } from '../lib/metrics';
 import { formatHours } from '../lib/dates';
 
@@ -175,17 +175,18 @@ export function ViewOnlyNotice() {
 
 const LINKS = {
   // View-only progress page for the whole team.
-  view: { path: 'share', label: 'Copy team link', title: 'Copy view-only team link', icon: Link2 },
+  view: { path: 'share', label: 'Copy view-only link', copied: 'View-only link copied', title: "Copy a view-only team link (can't edit anything)", icon: Eye },
   // Lets one person tick off tasks on this goal's pacing plan, and nothing else.
-  collab: { path: 'collab', label: 'Copy collaborator link', title: "Copy a link that lets someone tick off tasks on this goal's pacing plan", icon: UserPlus },
+  collab: { path: 'collab', label: 'Copy collaborator link', copied: 'Collaborator link copied', title: "Copy a link that lets someone tick off tasks on this goal's pacing plan", icon: UserPlus },
 } as const;
 
-export function ShareLinkButton({ projectId, kind = 'view', compact = false }: { projectId: string; kind?: keyof typeof LINKS; compact?: boolean }) {
+/** `code` is the goal's link code for this kind of link (project.links[kind]), never its internal id. */
+export function ShareLinkButton({ code, kind = 'view', compact = false }: { code: string; kind?: keyof typeof LINKS; compact?: boolean }) {
   const [copied, setCopied] = useState(false);
   const link = LINKS[kind];
   const Icon = link.icon;
   const copy = async () => {
-    const url = `${window.location.origin}${window.location.pathname}#/${link.path}/${projectId}`;
+    const url = `${window.location.origin}${window.location.pathname}#/${link.path}/${code}`;
     try {
       await navigator.clipboard.writeText(url);
     } catch {
@@ -198,9 +199,9 @@ export function ShareLinkButton({ projectId, kind = 'view', compact = false }: {
   return (
     <button type="button" onClick={copy} className={cn(btnSecondary, compact && 'px-2.5')} title={link.title} aria-label={compact ? link.title : undefined}>
       {copied ? <CheckIcon className="size-4 text-emerald-500" aria-hidden="true" /> : <Icon className="size-4" aria-hidden="true" />}
-      {!compact && (copied ? 'Link copied' : link.label)}
+      {!compact && (copied ? link.copied : link.label)}
       <span className="sr-only" role="status">
-        {copied ? 'Link copied to clipboard' : ''}
+        {copied ? `${link.copied} to clipboard` : ''}
       </span>
     </button>
   );

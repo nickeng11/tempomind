@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from 'react';
-import type { Energy, OwnerPrivateState, Project } from '../types';
+import type { Energy, OwnerPrivateState, Project, ShareLinks } from '../types';
 import { todayISO } from './dates';
 import { createDemoProjects } from './demo';
+import { secureToken } from './uid';
 
 // Projects and the owner's private state are persisted under separate keys.
 // In a hosted version these map to a shared project table and an owner-only
@@ -33,13 +34,27 @@ function write(key: string, value: unknown) {
   }
 }
 
+/** Projects saved before link codes existed get their own pair. */
+function withLinks(projects: Project[]): { projects: Project[]; changed: boolean } {
+  let changed = false;
+  const result = projects.map((p) => {
+    if (p.links?.view && p.links?.collab) return p;
+    changed = true;
+    return { ...p, links: { view: secureToken(), collab: secureToken() } };
+  });
+  return { projects: result, changed };
+}
+
 function init(): AppState {
-  let projects = read<Project[]>(PROJECTS_KEY);
-  if (!projects) {
-    projects = createDemoProjects(todayISO());
-    write(PROJECTS_KEY, projects);
-  }
+  const saved = read<Project[]>(PROJECTS_KEY);
+  const { projects, changed } = withLinks(saved ?? createDemoProjects(todayISO()));
+  if (!saved || changed) write(PROJECTS_KEY, projects);
   return { projects, owner: read<OwnerPrivateState>(PRIVATE_KEY) ?? EMPTY_OWNER };
+}
+
+/** Link pages look goals up by their link code, never by internal id. */
+export function findByLink(projects: Project[], kind: keyof ShareLinks, code: string): Project | undefined {
+  return projects.find((p) => p.links[kind] === code);
 }
 
 let state: AppState = init();
@@ -65,7 +80,7 @@ function updateProject(id: string, update: (p: Project) => Project) {
 
 // Keep other tabs (e.g. an open team-view link) in sync live.
 window.addEventListener('storage', (e) => {
-  if (e.key === PROJECTS_KEY) state = { ...state, projects: read<Project[]>(PROJECTS_KEY) ?? [] };
+  if (e.key === PROJECTS_KEY) state = { ...state, projects: withLinks(read<Project[]>(PROJECTS_KEY) ?? []).projects };
   else if (e.key === PRIVATE_KEY) state = { ...state, owner: read<OwnerPrivateState>(PRIVATE_KEY) ?? EMPTY_OWNER };
   else return;
   emit();
@@ -139,7 +154,7 @@ export const actions = {
   },
 
   resetDemo() {
-    state = { projects: createDemoProjects(todayISO()), owner: EMPTY_OWNER };
+    state = { projects: withLinks(createDemoProjects(todayISO())).projects, owner: EMPTY_OWNER };
     write(PROJECTS_KEY, state.projects);
     write(PRIVATE_KEY, state.owner);
     emit();

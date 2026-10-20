@@ -60,6 +60,16 @@ export interface Project {
   effort?: EffortPlan;
   /** Set when the owner confirms completion. The project then becomes read-only. */
   completedAt?: number;
+  /**
+   * Separate random codes for each kind of link, so a view-only link can't be
+   * turned into a collaborator link by editing the URL.
+   */
+  links: ShareLinks;
+}
+
+export interface ShareLinks {
+  view: string;
+  collab: string;
 }
 
 /**

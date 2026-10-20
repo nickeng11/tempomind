@@ -89,6 +89,8 @@ export interface PublicProjectView {
   session: PublicSession | null;
   milestones: MilestoneProgress[];
   completedAt: number | null;
+  /** Code for the view-only link. The collaborator code is never included here. */
+  viewLink: string;
 }
 
 export function toPublicView(p: Project, today: string, now: number): PublicProjectView {
@@ -106,5 +108,6 @@ export function toPublicView(p: Project, today: string, now: number): PublicProj
     session: liveSession && sessionTask ? { taskTitle: sessionTask.title, startedAt: liveSession.startedAt, durationMin: liveSession.durationMin } : null,
     milestones: milestoneProgress(p, today),
     completedAt: p.completedAt ?? null,
+    viewLink: p.links.view,
   };
 }

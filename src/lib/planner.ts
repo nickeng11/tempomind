@@ -1,6 +1,6 @@
 import type { EffortSize, Milestone, Project, Task } from '../types';
 import { addDays, formatDate, formatHours, isWeekend, parseISODate, toISODate, todayISO, weekStart } from './dates';
-import { uid } from './uid';
+import { secureToken, uid } from './uid';
 
 type StepTpl = readonly [title: string, minutes: number];
 interface TaskTpl { title: string; steps: StepTpl[] }
@@ -473,6 +473,7 @@ export function buildPlan(goal: string, deadline: string, start: string, options
       tasks,
       session: null,
       effort: { size, hoursPerWeek, bufferDays },
+      links: { view: secureToken(), collab: secureToken() },
     },
     reasoning,
   };

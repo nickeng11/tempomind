@@ -5,13 +5,13 @@ import { OwnerView } from './components/OwnerView';
 import { SharePage } from './components/SharePage';
 import { CompletedView, TeamView } from './components/TeamView';
 import { useHash, useToday } from './lib/hooks';
-import { useAppState } from './lib/store';
+import { findByLink, useAppState } from './lib/store';
 
-type Route = { name: View } | { name: 'share' | 'collab'; projectId: string };
+type Route = { name: View } | { name: 'share' | 'collab'; code: string };
 
 function parseRoute(hash: string): Route {
   const link = hash.match(/^#\/(share|collab)\/([\w-]+)/);
-  if (link) return { name: link[1] as 'share' | 'collab', projectId: link[2] };
+  if (link) return { name: link[1] as 'share' | 'collab', code: link[2] };
   if (hash.startsWith('#/team')) return { name: 'team' };
   if (hash.startsWith('#/completed')) return { name: 'completed' };
   return { name: 'owner' };
@@ -42,11 +42,12 @@ function Routes() {
   const today = useToday();
 
   // Link pages get the one project only; the owner's private state is never passed.
+  // Each kind of link only matches its own code, so editing "share" to "collab" in the URL finds nothing.
   if (route.name === 'share') {
-    return <SharePage project={projects.find((p) => p.id === route.projectId)} today={today} />;
+    return <SharePage project={findByLink(projects, 'view', route.code)} today={today} />;
   }
   if (route.name === 'collab') {
-    return <CollabPage project={projects.find((p) => p.id === route.projectId)} today={today} />;
+    return <CollabPage project={findByLink(projects, 'collab', route.code)} today={today} />;
   }
 
   // Confirmed-complete goals leave the workspace and team view for the read-only archive.
