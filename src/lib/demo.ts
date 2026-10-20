@@ -1,0 +1,46 @@
+import type { Project, Task } from '../types';
+import { addDays, formatDate, parseISODate } from './dates';
+import { buildPlan } from './planner';
+
+function at(date: string, hour: number): number {
+  const d = parseISODate(date);
+  d.setHours(hour, 0, 0, 0);
+  return d.getTime();
+}
+
+/** Marks the first `count` micro-steps of a task done, stamped on `doneOn`. */
+function complete(t: Task, doneOn: string, count = t.steps.length): Task {
+  return {
+    ...t,
+    steps: t.steps.map((s, i) => (i < count ? { ...s, done: true, doneAt: at(doneOn, 9 + Math.min(i, 3)) } : s)),
+  };
+}
+
+/** Two in-flight projects so the demo opens with realistic, live-looking numbers. */
+export function createDemoProjects(today: string): Project[] {
+  // Slightly behind pace, with a focus session already running.
+  const roadmapDue = addDays(today, 18);
+  const roadmap = buildPlan(`Build Q3 Product Roadmap by ${formatDate(roadmapDue)}`, roadmapDue, addDays(today, -10), { size: 'medium', hoursPerWeek: 8 }).project;
+  const past = roadmap.tasks.filter((t) => t.date < today && t.kind !== 'review');
+  const lagging = past[past.length - 1]?.id;
+  const firstToday = roadmap.tasks.find((t) => t.date === today)?.id;
+  roadmap.tasks = roadmap.tasks.map((t) => {
+    if (t.date < today) return t.id === lagging ? complete(t, t.date, 1) : complete(t, t.date);
+    if (t.id === firstToday) return complete(t, today, 1);
+    return t;
+  });
+  if (firstToday) roadmap.session = { taskId: firstToday, startedAt: Date.now() - 14 * 60_000, durationMin: 50 };
+
+  // Ahead of pace: everything through today's first task (and a bit of tomorrow) is done.
+  const betaDue = addDays(today, 24);
+  const beta = buildPlan(`Launch the TempoMind beta by ${formatDate(betaDue)}`, betaDue, addDays(today, -4), { size: 'medium', hoursPerWeek: 12 }).project;
+  const aheadIds = new Set(beta.tasks.filter((t) => t.date > today).slice(0, 1).map((t) => t.id));
+  const betaFirstToday = beta.tasks.find((t) => t.date === today)?.id;
+  beta.tasks = beta.tasks.map((t) => {
+    if (t.date < today) return complete(t, t.date);
+    if (t.id === betaFirstToday || aheadIds.has(t.id)) return complete(t, today);
+    return t;
+  });
+
+  return [roadmap, beta];
+}
