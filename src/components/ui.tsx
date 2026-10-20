@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { Activity, Check as CheckIcon, Link2, ShieldCheck } from 'lucide-react';
+import { Activity, Check as CheckIcon, Link2, ShieldCheck, UserPlus } from 'lucide-react';
 import type { PaceStatus } from '../lib/metrics';
 import { formatHours } from '../lib/dates';
 
@@ -173,27 +173,32 @@ export function ViewOnlyNotice() {
   );
 }
 
-function shareUrl(projectId: string): string {
-  return `${window.location.origin}${window.location.pathname}#/share/${projectId}`;
-}
+const LINKS = {
+  // View-only progress page for the whole team.
+  view: { path: 'share', label: 'Copy team link', title: 'Copy view-only team link', icon: Link2 },
+  // Lets one person tick off tasks on this goal's pacing plan, and nothing else.
+  collab: { path: 'collab', label: 'Copy collaborator link', title: "Copy a link that lets someone tick off tasks on this goal's pacing plan", icon: UserPlus },
+} as const;
 
-export function ShareLinkButton({ projectId, compact = false }: { projectId: string; compact?: boolean }) {
+export function ShareLinkButton({ projectId, kind = 'view', compact = false }: { projectId: string; kind?: keyof typeof LINKS; compact?: boolean }) {
   const [copied, setCopied] = useState(false);
+  const link = LINKS[kind];
+  const Icon = link.icon;
   const copy = async () => {
-    const url = shareUrl(projectId);
+    const url = `${window.location.origin}${window.location.pathname}#/${link.path}/${projectId}`;
     try {
       await navigator.clipboard.writeText(url);
     } catch {
-      window.prompt('Copy this view-only link:', url);
+      window.prompt('Copy this link:', url);
       return;
     }
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
   return (
-    <button type="button" onClick={copy} className={cn(btnSecondary, compact && 'px-2.5')} title="Copy view-only team link" aria-label={compact ? 'Copy view-only team link' : undefined}>
-      {copied ? <CheckIcon className="size-4 text-emerald-500" aria-hidden="true" /> : <Link2 className="size-4" aria-hidden="true" />}
-      {!compact && (copied ? 'Link copied' : 'Copy team link')}
+    <button type="button" onClick={copy} className={cn(btnSecondary, compact && 'px-2.5')} title={link.title} aria-label={compact ? link.title : undefined}>
+      {copied ? <CheckIcon className="size-4 text-emerald-500" aria-hidden="true" /> : <Icon className="size-4" aria-hidden="true" />}
+      {!compact && (copied ? 'Link copied' : link.label)}
       <span className="sr-only" role="status">
         {copied ? 'Link copied to clipboard' : ''}
       </span>

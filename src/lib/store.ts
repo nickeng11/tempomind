@@ -89,24 +89,29 @@ export const actions = {
     setProjects((projects) => projects.filter((p) => p.id !== id));
   },
 
-  setStepsDone(projectId: string, stepIds: string[], done: boolean) {
+  /** `by` is the collaborator's name; omit it when the owner makes the change. Completed goals are locked. */
+  setStepsDone(projectId: string, stepIds: string[], done: boolean, by?: string) {
     const ids = new Set(stepIds);
     const now = Date.now();
-    updateProject(projectId, (p) => ({
-      ...p,
-      tasks: p.tasks.map((t) =>
-        t.steps.some((s) => ids.has(s.id))
-          ? {
-              ...t,
-              steps: t.steps.map((s) => {
-                if (!ids.has(s.id)) return s;
-                if (!done) return { ...s, done: false, doneAt: undefined };
-                return s.done ? s : { ...s, done: true, doneAt: now };
-              }),
-            }
-          : t,
-      ),
-    }));
+    updateProject(projectId, (p) =>
+      p.completedAt
+        ? p
+        : {
+            ...p,
+            tasks: p.tasks.map((t) =>
+              t.steps.some((s) => ids.has(s.id))
+                ? {
+                    ...t,
+                    steps: t.steps.map((s) => {
+                      if (!ids.has(s.id)) return s;
+                      if (!done) return { ...s, done: false, doneAt: undefined, doneBy: undefined };
+                      return s.done ? s : { ...s, done: true, doneAt: now, doneBy: by };
+                    }),
+                  }
+                : t,
+            ),
+          },
+    );
   },
 
   startSession(projectId: string, taskId: string, durationMin: number) {

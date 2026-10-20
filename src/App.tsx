@@ -1,4 +1,5 @@
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
+import { CollabPage } from './components/CollabPage';
 import { Header, type View } from './components/Header';
 import { OwnerView } from './components/OwnerView';
 import { SharePage } from './components/SharePage';
@@ -6,11 +7,11 @@ import { CompletedView, TeamView } from './components/TeamView';
 import { useHash, useToday } from './lib/hooks';
 import { useAppState } from './lib/store';
 
-type Route = { name: View } | { name: 'share'; projectId: string };
+type Route = { name: View } | { name: 'share' | 'collab'; projectId: string };
 
 function parseRoute(hash: string): Route {
-  const share = hash.match(/^#\/share\/([\w-]+)/);
-  if (share) return { name: 'share', projectId: share[1] };
+  const link = hash.match(/^#\/(share|collab)\/([\w-]+)/);
+  if (link) return { name: link[1] as 'share' | 'collab', projectId: link[2] };
   if (hash.startsWith('#/team')) return { name: 'team' };
   if (hash.startsWith('#/completed')) return { name: 'completed' };
   return { name: 'owner' };
@@ -40,8 +41,12 @@ function Routes() {
   const { projects, owner } = useAppState();
   const today = useToday();
 
+  // Link pages get the one project only; the owner's private state is never passed.
   if (route.name === 'share') {
     return <SharePage project={projects.find((p) => p.id === route.projectId)} today={today} />;
+  }
+  if (route.name === 'collab') {
+    return <CollabPage project={projects.find((p) => p.id === route.projectId)} today={today} />;
   }
 
   // Confirmed-complete goals leave the workspace and team view for the read-only archive.

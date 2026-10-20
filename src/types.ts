@@ -6,6 +6,8 @@ export interface MicroStep {
   minutes: number;
   done: boolean;
   doneAt?: number;
+  /** Name a collaborator entered when they ticked this off via a collaborator link. Absent when the owner did. */
+  doneBy?: string;
 }
 
 export interface Task {

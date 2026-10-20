@@ -8,11 +8,11 @@ function at(date: string, hour: number): number {
   return d.getTime();
 }
 
-/** Marks the first `count` micro-steps of a task done, stamped on `doneOn`. */
-function complete(t: Task, doneOn: string, count = t.steps.length): Task {
+/** Marks the first `count` micro-steps of a task done, stamped on `doneOn`, optionally by a collaborator. */
+function complete(t: Task, doneOn: string, count = t.steps.length, doneBy?: string): Task {
   return {
     ...t,
-    steps: t.steps.map((s, i) => (i < count ? { ...s, done: true, doneAt: at(doneOn, 9 + Math.min(i, 3)) } : s)),
+    steps: t.steps.map((s, i) => (i < count ? { ...s, done: true, doneAt: at(doneOn, 9 + Math.min(i, 3)), ...(doneBy ? { doneBy } : {}) } : s)),
   };
 }
 
@@ -23,9 +23,14 @@ export function createDemoProjects(today: string): Project[] {
   const roadmap = buildPlan(`Build Q3 Product Roadmap by ${formatDate(roadmapDue)}`, roadmapDue, addDays(today, -10), { size: 'medium', hoursPerWeek: 8 }).project;
   const past = roadmap.tasks.filter((t) => t.date < today && t.kind !== 'review');
   const lagging = past[past.length - 1]?.id;
+  // A couple of tasks ticked off by a (fictional) collaborator, to show the attribution marks.
+  const byCollaborator = new Set([past[1]?.id, past[past.length - 3]?.id]);
   const firstToday = roadmap.tasks.find((t) => t.date === today)?.id;
   roadmap.tasks = roadmap.tasks.map((t) => {
-    if (t.date < today) return t.id === lagging ? complete(t, t.date, 1) : complete(t, t.date);
+    if (t.date < today) {
+      if (t.id === lagging) return complete(t, t.date, 1);
+      return complete(t, t.date, t.steps.length, byCollaborator.has(t.id) ? 'Sam Rivera' : undefined);
+    }
     if (t.id === firstToday) return complete(t, today, 1);
     return t;
   });

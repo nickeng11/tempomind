@@ -188,7 +188,7 @@ function ProjectHeader({ project, today }: { project: Project; today: string }) 
             Due {formatDate(project.deadline, true)} · {daysLeftLabel(diffDays(today, project.deadline))}
           </p>
         </div>
-        <ShareLinkButton projectId={project.id} />
+        <ShareLinkButton projectId={project.id} kind="collab" />
       </div>
       <div className="mt-4 flex items-center gap-3">
         <ProgressBar size="lg" value={percent} label="Project completion" />
