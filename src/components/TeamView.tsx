@@ -1,9 +1,9 @@
 import { CircleCheckBig, Lock, Timer, Users } from 'lucide-react';
 import type { Project } from '../types';
-import { daysLeftLabel, diffDays, formatClock, formatDate, formatHours, toISODate } from '../lib/dates';
+import { daysLeftLabel, diffDays, formatClock, formatDate, toISODate } from '../lib/dates';
 import { useNow } from '../lib/hooks';
 import { toPublicView, type PublicProjectView, type PublicSession } from '../lib/metrics';
-import { Card, cn, CountdownRing, LiveDot, PacePill, ProgressBar, ShareLinkButton, ViewOnlyNotice } from './ui';
+import { Card, cn, CountdownRing, LiveDot, ProgressBar, ShareLinkButton, ViewOnlyNotice } from './ui';
 
 /**
  * Teammate dashboard. It receives projects only: the owner's private state
@@ -117,56 +117,17 @@ export function TeamProjectCard({ view, now, shareable = false }: { view: Public
         </p>
       )}
 
-      <div className="mt-5 flex flex-wrap items-end justify-between gap-3">
-        <p className="text-4xl font-semibold tracking-tight tabular-nums">
-          {view.percent}%<span className="ml-2 text-base font-medium tracking-normal text-muted">Complete</span>
-        </p>
-        <PacePill status={view.paceStatus} deltaMin={view.paceDeltaMin} />
-      </div>
+      <p className="mt-5 text-4xl font-semibold tracking-tight tabular-nums">
+        {view.percent}%<span className="ml-2 text-base font-medium tracking-normal text-muted">Complete</span>
+      </p>
       <ProgressBar size="lg" value={view.percent} label="Project completion" className="mt-3" />
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <PacingBox view={view} />
+      <div className="mt-5">
         {completedOn ? <FinishedBox completedOn={completedOn} deadline={view.deadline} /> : <LiveSession session={view.session} now={now} />}
       </div>
 
       <MilestoneTrack view={view} />
     </Card>
-  );
-}
-
-function PacingBox({ view }: { view: PublicProjectView }) {
-  const slip = view.slipDays;
-  const relative = slip > 0 ? `${slip}d behind` : slip < 0 ? `${-slip}d ahead` : 'on schedule';
-
-  return (
-    <div className="rounded-xl bg-base-50 p-4 dark:bg-base-950/50">
-      <p className="text-xs font-medium text-muted">Estimated vs. actual</p>
-      <div className="mt-3 space-y-3">
-        <PaceRow label="Planned by today" minutes={view.expectedMin} percent={view.expectedPercent} muted />
-        <PaceRow label="Done" minutes={view.doneMin} percent={view.percent} />
-      </div>
-      <p className="mt-3 text-xs text-muted">
-        ~{formatHours(view.totalMin)} total · {view.paceStatus === 'done' ? 'complete' : `finish ${formatDate(view.projectedFinish)} (${relative})`}
-      </p>
-    </div>
-  );
-}
-
-function PaceRow({ label, minutes, percent, muted = false }: { label: string; minutes: number; percent: number; muted?: boolean }) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between text-sm">
-        <span className="text-base-600 dark:text-base-400">{label}</span>
-        <span className="font-semibold tabular-nums">{formatHours(minutes)}</span>
-      </div>
-      <div className="mt-1.5 h-1.5 rounded-full bg-base-200/80 dark:bg-base-800">
-        <div
-          className={cn('h-full rounded-full transition-[width] duration-700', muted ? 'bg-base-400 dark:bg-base-500' : 'bg-linear-to-r from-accent-500 to-accent2-500')}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-    </div>
   );
 }
 

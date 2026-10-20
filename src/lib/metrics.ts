@@ -1,5 +1,5 @@
 import type { Milestone, Project, Task, WorkSession } from '../types';
-import { addDays, diffDays, isWeekend, weekStart } from './dates';
+import { diffDays, weekStart } from './dates';
 
 export type PaceStatus = 'ahead' | 'on-track' | 'behind' | 'done';
 export type MilestoneStatus = 'done' | 'current' | 'upcoming' | 'late';
@@ -57,26 +57,33 @@ export interface PublicSession {
   durationMin: number;
 }
 
+/** Owner-only: how far ahead or behind the plan the work is, in minutes. */
+export function projectPace(p: Project, today: string): { status: PaceStatus; deltaMin: number } {
+  const totalMin = p.tasks.reduce((n, t) => n + taskMinutes(t), 0);
+  const doneMin = p.tasks.reduce((n, t) => n + taskDoneMinutes(t), 0);
+  const expectedMin = p.tasks.filter((t) => t.date < today).reduce((n, t) => n + taskMinutes(t), 0);
+  const deltaMin = doneMin - expectedMin;
+  const tolerance = Math.max(30, totalMin * 0.03);
+
+  let status: PaceStatus = 'on-track';
+  if (doneMin >= totalMin) status = 'done';
+  else if (deltaMin > tolerance) status = 'ahead';
+  else if (deltaMin < -tolerance) status = 'behind';
+  return { status, deltaMin };
+}
+
 /**
  * Everything a teammate is allowed to see about a project. It is built from
  * the Project alone: the owner's private energy state lives in a separate
- * store and is never an input here.
+ * store and is never an input here. Pace and hours worked vs. planned are
+ * deliberately left out, since day-to-day output can hint at someone's energy.
  */
 export interface PublicProjectView {
   id: string;
   title: string;
   deadline: string;
   daysLeft: number;
-  totalMin: number;
-  doneMin: number;
-  expectedMin: number;
   percent: number;
-  expectedPercent: number;
-  paceStatus: PaceStatus;
-  paceDeltaMin: number;
-  /** Working days behind (positive) or ahead (negative) of the plan. */
-  slipDays: number;
-  projectedFinish: string;
   /** Parent task title only. Micro-steps are never exposed, since their size hints at energy. */
   activeTask: string | null;
   session: PublicSession | null;
@@ -85,21 +92,6 @@ export interface PublicProjectView {
 }
 
 export function toPublicView(p: Project, today: string, now: number): PublicProjectView {
-  const totalMin = p.tasks.reduce((n, t) => n + taskMinutes(t), 0);
-  const doneMin = p.tasks.reduce((n, t) => n + taskDoneMinutes(t), 0);
-  const expectedMin = p.tasks.filter((t) => t.date < today).reduce((n, t) => n + taskMinutes(t), 0);
-  const delta = doneMin - expectedMin;
-  const tolerance = Math.max(30, totalMin * 0.03);
-
-  let paceStatus: PaceStatus = 'on-track';
-  if (doneMin >= totalMin) paceStatus = 'done';
-  else if (delta > tolerance) paceStatus = 'ahead';
-  else if (delta < -tolerance) paceStatus = 'behind';
-
-  // Keep the projection consistent with the pace pill: within tolerance means on schedule.
-  const slipDays = paceStatus === 'on-track' || paceStatus === 'done' ? 0 : scheduleSlip(p, today, doneMin);
-  const lastPlannedDay = p.tasks.length ? p.tasks[p.tasks.length - 1].date : p.deadline;
-
   const liveSession = isSessionLive(p.session, now) ? p.session : null;
   const sessionTask = liveSession ? p.tasks.find((t) => t.id === liveSession.taskId) : undefined;
   const active = sessionTask ?? nextOpenTask(p);
@@ -109,48 +101,10 @@ export function toPublicView(p: Project, today: string, now: number): PublicProj
     title: p.title,
     deadline: p.deadline,
     daysLeft: diffDays(today, p.deadline),
-    totalMin,
-    doneMin,
-    expectedMin,
-    percent: percentOf(doneMin, totalMin),
-    expectedPercent: percentOf(expectedMin, totalMin),
-    paceStatus,
-    paceDeltaMin: delta,
-    slipDays,
-    projectedFinish: paceStatus === 'done' ? today : shiftWorkdays(lastPlannedDay, slipDays),
+    percent: projectPercent(p),
     activeTask: active?.title ?? null,
     session: liveSession && sessionTask ? { taskTitle: sessionTask.title, startedAt: liveSession.startedAt, durationMin: liveSession.durationMin } : null,
     milestones: milestoneProgress(p, today),
     completedAt: p.completedAt ?? null,
   };
-}
-
-/**
- * Schedule slip in working days: how many planned days of work are done,
- * versus how many planned days have already passed. Positive means behind.
- */
-function scheduleSlip(p: Project, today: string, doneMin: number): number {
-  const days = [...new Set(p.tasks.map((t) => t.date))];
-  let remaining = doneMin;
-  let earned = 0;
-  for (const day of days) {
-    const planned = p.tasks.filter((t) => t.date === day).reduce((n, t) => n + taskMinutes(t), 0);
-    if (remaining >= planned) {
-      earned += 1;
-      remaining -= planned;
-    } else {
-      earned += remaining / planned;
-      break;
-    }
-  }
-  return Math.round(days.filter((d) => d < today).length - earned);
-}
-
-function shiftWorkdays(date: string, n: number): string {
-  let d = date;
-  for (let left = Math.abs(n); left > 0; ) {
-    d = addDays(d, Math.sign(n));
-    if (!isWeekend(d)) left--;
-  }
-  return d;
 }

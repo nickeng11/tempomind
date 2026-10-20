@@ -16,7 +16,7 @@ npm run build    # type-check + production build
 - **Effort & capacity check:** the planner guesses how big the goal is (Small ~6h, Medium ~24h, Large ~60h) and uses your hours per week to check it fits before the deadline. If it doesn't, it suggests a later deadline, more hours, or a smaller scope. When there's slack, the last ~15% of the runway is kept as buffer.
 - **🔒 Private energy slicer:** ⚡ High Focus / 🟢 Steady / 🔋 Low Energy / 🔥 Fried re-slice *today's* work (deep-work blocks, ~20-min chunks, or one tiny step at a time). Task dates, milestones and deadlines are never changed.
 - **Focus sessions:** start a timed session from Today; teammates see the task name and a live countdown.
-- **Team view (view-only):** current task, % complete, estimated vs. actual pacing with projected finish, live session countdown and a weekly timeline.
+- **Team view (view-only):** current task, % complete, live session countdown and a weekly timeline. Pace and hours worked vs. planned are deliberately not shared, since day-to-day output can hint at someone's energy; the owner still sees their own pace in My Workspace.
 - **Human-in-the-loop completion:** at 100% a goal shows **Mark for completion**; after confirming, it's locked, greyed out at the bottom of the workspace and listed on the read-only **Completed Goals** page. Unticking it (and confirming) makes it live again.
 - **Share links:** `#/share/<projectId>` opens a standalone, view-only page that updates live in other tabs of the same browser.
 - **Colour schemes & dark mode:** five palettes, generated from Tailwind's colour scales (`npm run palettes`).
@@ -34,6 +34,7 @@ npm run build    # type-check + production build
 - Energy check-ins live in a separate owner-only store (`tempomind.owner-private.v1`) and reset daily.
 - The team view, Completed Goals and share pages receive **projects only**, and render from `toPublicView()` (`src/lib/metrics.ts`), whose inputs don't include energy.
 - The public "current task" is always the parent task, never an energy-sized micro-step.
+- The public view carries no pace, hours planned, hours done or projected finish date, so output levels can't be read from it.
 
 ## Demo notes
 

@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { CircleCheckBig, Lock, PartyPopper, Plus, RotateCcw, X } from 'lucide-react';
 import type { OwnerPrivateState, Project } from '../types';
-import { daysLeftLabel, formatDate, toISODate } from '../lib/dates';
-import { useNow, useRememberedId } from '../lib/hooks';
-import { projectPercent, toPublicView } from '../lib/metrics';
+import { daysLeftLabel, diffDays, formatDate, toISODate } from '../lib/dates';
+import { useRememberedId } from '../lib/hooks';
+import { projectPace, projectPercent } from '../lib/metrics';
 import { actions, energyForToday } from '../lib/store';
 import { EnergyCard } from './EnergyCard';
 import { GoalComposer } from './GoalComposer';
@@ -174,9 +174,10 @@ function ProjectTabs({ projects, selectedId, onSelect }: { projects: Project[]; 
 }
 
 function ProjectHeader({ project, today }: { project: Project; today: string }) {
-  const view = toPublicView(project, today, useNow(30_000));
+  const percent = projectPercent(project);
+  const pace = projectPace(project, today);
   const [confirming, setConfirming] = useState(false);
-  const allDone = view.percent === 100;
+  const allDone = percent === 100;
 
   return (
     <Card className="p-5">
@@ -184,15 +185,16 @@ function ProjectHeader({ project, today }: { project: Project; today: string }) 
         <div className="min-w-0">
           <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{project.title}</h1>
           <p className="mt-1 text-sm text-muted">
-            Due {formatDate(project.deadline, true)} · {daysLeftLabel(view.daysLeft)}
+            Due {formatDate(project.deadline, true)} · {daysLeftLabel(diffDays(today, project.deadline))}
           </p>
         </div>
         <ShareLinkButton projectId={project.id} />
       </div>
       <div className="mt-4 flex items-center gap-3">
-        <ProgressBar size="lg" value={view.percent} label="Project completion" />
-        <span className="shrink-0 text-sm font-semibold tabular-nums">{view.percent}%</span>
-        <PacePill status={view.paceStatus} deltaMin={view.paceDeltaMin} />
+        <ProgressBar size="lg" value={percent} label="Project completion" />
+        <span className="shrink-0 text-sm font-semibold tabular-nums">{percent}%</span>
+        {/* Pace stays in the owner's private view; teammates never see it. */}
+        <PacePill status={pace.status} deltaMin={pace.deltaMin} />
       </div>
 
       <AnimatePresence initial={false}>
