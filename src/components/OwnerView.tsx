@@ -10,7 +10,7 @@ import { EnergyCard } from './EnergyCard';
 import { GoalComposer } from './GoalComposer';
 import { PlanTimeline } from './PlanTimeline';
 import { TodayPanel } from './TodayPanel';
-import { CompleteDialog } from './CompleteDialog';
+import { CompleteDialog, ReopenDialog } from './CompleteDialog';
 import { btnPrimary, btnSecondary, Card, cn, PacePill, ProgressBar, ShareLinkButton } from './ui';
 
 export function OwnerView({ projects, completed, owner, today }: { projects: Project[]; completed: Project[]; owner: OwnerPrivateState; today: string }) {
@@ -19,6 +19,9 @@ export function OwnerView({ projects, completed, owner, today }: { projects: Pro
   const project = projects.find((p) => p.id === selectedId) ?? projects[0];
   const energy = energyForToday(owner, today);
   const showComposer = composing || !project;
+
+  // Unticking a completed goal only asks; nothing changes until the owner confirms.
+  const [reopening, setReopening] = useState<Project | null>(null);
 
   // Reopening brings the goal back as the selected, editable project at the top of the page.
   const reopen = (id: string) => {
@@ -74,7 +77,15 @@ export function OwnerView({ projects, completed, owner, today }: { projects: Pro
         </>
       )}
 
-      <CompletedSection projects={completed} onReopen={reopen} />
+      <CompletedSection projects={completed} onRequestReopen={setReopening} />
+      <ReopenDialog
+        project={reopening}
+        onCancel={() => setReopening(null)}
+        onConfirm={() => {
+          if (reopening) reopen(reopening.id);
+          setReopening(null);
+        }}
+      />
 
       <footer className="flex justify-end pt-2">
         <button
@@ -90,7 +101,7 @@ export function OwnerView({ projects, completed, owner, today }: { projects: Pro
 }
 
 /** Confirmed-complete goals, locked at the bottom of the workspace. Unticking one reopens it. */
-function CompletedSection({ projects, onReopen }: { projects: Project[]; onReopen: (id: string) => void }) {
+function CompletedSection({ projects, onRequestReopen }: { projects: Project[]; onRequestReopen: (project: Project) => void }) {
   if (projects.length === 0) return null;
   const sorted = [...projects].sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
 
@@ -100,7 +111,7 @@ function CompletedSection({ projects, onReopen }: { projects: Project[]; onReope
       <AnimatePresence initial={false}>
         {sorted.map((p) => (
           <motion.li key={p.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="shrink-0">
-            <CompletedGoalItem project={p} onReopen={onReopen} />
+            <CompletedGoalItem project={p} onRequestReopen={onRequestReopen} />
           </motion.li>
         ))}
       </AnimatePresence>
@@ -108,7 +119,7 @@ function CompletedSection({ projects, onReopen }: { projects: Project[]; onReope
   );
 }
 
-function CompletedGoalItem({ project, onReopen }: { project: Project; onReopen: (id: string) => void }) {
+function CompletedGoalItem({ project, onRequestReopen }: { project: Project; onRequestReopen: (project: Project) => void }) {
   const completedOn = toISODate(new Date(project.completedAt ?? Date.now()));
   const inputId = `reopen-${project.id}`;
 
@@ -121,7 +132,8 @@ function CompletedGoalItem({ project, onReopen }: { project: Project; onReopen: 
     >
       <Lock className="size-3.5 shrink-0 text-muted" aria-hidden="true" />
       <span className="max-w-56 truncate font-medium text-base-700 dark:text-base-300">{project.title}</span>
-      <input id={inputId} type="checkbox" checked onChange={() => onReopen(project.id)} className="size-4 cursor-pointer accent-base-600" />
+      {/* Stays ticked: the change only happens if the owner confirms in the dialog. */}
+      <input id={inputId} type="checkbox" checked onChange={() => onRequestReopen(project)} className="size-4 cursor-pointer accent-base-600" />
       <span className="sr-only">Completed and locked. Untick to reopen.</span>
     </label>
   );
