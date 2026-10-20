@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { CircleCheckBig, PartyPopper, Plus, RotateCcw, X } from 'lucide-react';
+import { CircleCheckBig, Lock, PartyPopper, Plus, RotateCcw, X } from 'lucide-react';
 import type { OwnerPrivateState, Project } from '../types';
-import { daysLeftLabel, formatDate } from '../lib/dates';
+import { daysLeftLabel, formatDate, toISODate } from '../lib/dates';
 import { useNow, useRememberedId } from '../lib/hooks';
 import { projectPercent, toPublicView } from '../lib/metrics';
 import { actions, energyForToday } from '../lib/store';
@@ -13,12 +13,21 @@ import { TodayPanel } from './TodayPanel';
 import { CompleteDialog } from './CompleteDialog';
 import { btnPrimary, btnSecondary, Card, cn, PacePill, ProgressBar, ShareLinkButton } from './ui';
 
-export function OwnerView({ projects, owner, today }: { projects: Project[]; owner: OwnerPrivateState; today: string }) {
+export function OwnerView({ projects, completed, owner, today }: { projects: Project[]; completed: Project[]; owner: OwnerPrivateState; today: string }) {
   const [selectedId, setSelectedId] = useRememberedId('tempomind.selected-project');
   const [composing, setComposing] = useState(false);
   const project = projects.find((p) => p.id === selectedId) ?? projects[0];
   const energy = energyForToday(owner, today);
   const showComposer = composing || !project;
+
+  // Reopening brings the goal back as the selected, editable project at the top of the page.
+  const reopen = (id: string) => {
+    actions.reopenProject(id);
+    setSelectedId(id);
+    setComposing(false);
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  };
 
   return (
     <div className="space-y-6 pt-6">
@@ -65,6 +74,8 @@ export function OwnerView({ projects, owner, today }: { projects: Project[]; own
         </>
       )}
 
+      <CompletedSection projects={completed} onReopen={reopen} />
+
       <footer className="flex justify-end pt-2">
         <button
           type="button"
@@ -75,6 +86,44 @@ export function OwnerView({ projects, owner, today }: { projects: Project[]; own
         </button>
       </footer>
     </div>
+  );
+}
+
+/** Confirmed-complete goals, locked at the bottom of the workspace. Unticking one reopens it. */
+function CompletedSection({ projects, onReopen }: { projects: Project[]; onReopen: (id: string) => void }) {
+  if (projects.length === 0) return null;
+  const sorted = [...projects].sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
+
+  // A single row of compact items; it scrolls sideways rather than wrapping when there are many.
+  return (
+    <ul aria-label="Completed goals (locked, untick to reopen)" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:thin] sm:mx-0 sm:px-0">
+      <AnimatePresence initial={false}>
+        {sorted.map((p) => (
+          <motion.li key={p.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="shrink-0">
+            <CompletedGoalItem project={p} onReopen={onReopen} />
+          </motion.li>
+        ))}
+      </AnimatePresence>
+    </ul>
+  );
+}
+
+function CompletedGoalItem({ project, onReopen }: { project: Project; onReopen: (id: string) => void }) {
+  const completedOn = toISODate(new Date(project.completedAt ?? Date.now()));
+  const inputId = `reopen-${project.id}`;
+
+  return (
+    // Greyed with a grayscale filter (not opacity) so the text keeps its contrast.
+    <label
+      htmlFor={inputId}
+      title={`Completed ${formatDate(completedOn, true)}. Untick to reopen.`}
+      className="flex cursor-pointer items-center gap-2 rounded-xl border border-base-200 bg-base-100/70 py-1.5 pl-3 pr-2.5 text-sm grayscale transition hover:border-base-300 dark:border-base-800 dark:bg-base-900/40 dark:hover:border-base-700"
+    >
+      <Lock className="size-3.5 shrink-0 text-muted" aria-hidden="true" />
+      <span className="max-w-56 truncate font-medium text-base-700 dark:text-base-300">{project.title}</span>
+      <input id={inputId} type="checkbox" checked onChange={() => onReopen(project.id)} className="size-4 cursor-pointer accent-base-600" />
+      <span className="sr-only">Completed and locked. Untick to reopen.</span>
+    </label>
   );
 }
 

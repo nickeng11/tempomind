@@ -34,8 +34,8 @@ export function CompleteDialog({ project, open, onCancel, onConfirm }: { project
       <div id="complete-desc" className="mt-2 space-y-2 text-sm text-muted">
         <p>Every sub-task is checked off. Confirming will:</p>
         <ul className="list-disc space-y-1 pl-5">
-          <li>Move this goal to Completed Goals</li>
-          <li>Make it read-only for you and your team</li>
+          <li>Move it to the bottom of your workspace and to Completed Goals</li>
+          <li>Lock it as read-only (untick it later to reopen)</li>
           <li>End any running focus session</li>
         </ul>
       </div>

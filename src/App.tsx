@@ -66,7 +66,7 @@ function Routes() {
             ) : route.name === 'completed' ? (
               <CompletedView projects={completed} today={today} />
             ) : (
-              <OwnerView projects={active} owner={owner} today={today} />
+              <OwnerView projects={active} completed={completed} owner={owner} today={today} />
             )}
           </motion.div>
         </AnimatePresence>

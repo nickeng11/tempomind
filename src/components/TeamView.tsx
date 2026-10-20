@@ -53,7 +53,7 @@ export function CompletedView({ projects, today }: { projects: Project[]; today:
       <div className="flex items-start gap-3 rounded-2xl border border-base-200 bg-base-100/70 px-4 py-3 text-sm text-base-700 dark:border-base-800 dark:bg-base-900/50 dark:text-base-300">
         <Lock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
         <p>
-          <span className="font-semibold">View-only archive.</span> Goals appear here once their owner confirms completion. They can't be edited.
+          <span className="font-semibold">View-only archive.</span> Goals appear here once their owner confirms completion. Only the owner can reopen one, from their workspace.
         </p>
       </div>
       <div>
