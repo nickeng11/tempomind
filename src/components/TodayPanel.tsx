@@ -25,9 +25,11 @@ export function TodayPanel({ project, energy, today }: { project: Project; energ
       <div className="flex items-start justify-between gap-4 px-5 pt-5">
         <div className="min-w-0">
           <h2 className="font-semibold tracking-tight">
-            Today <span className="font-normal text-base-500">· {formatDate(today, true)}</span>
+            Today <span className="font-normal text-muted">· {formatDate(today, true)}</span>
           </h2>
-          <p className="mt-0.5 text-sm text-base-500">{energy ? meta.mode : 'Pick an energy level to re-slice today'}</p>
+          <p className="mt-0.5 text-sm text-muted" aria-live="polite">
+            {energy ? meta.mode : 'Pick an energy level to re-slice today'}
+          </p>
         </div>
         <SessionControl project={project} minutes={meta.sessionMin} />
       </div>
@@ -64,7 +66,7 @@ function SessionControl({ project, minutes }: { project: Project; minutes: numbe
       <div className="flex shrink-0 items-center gap-2.5 rounded-xl border border-base-200 py-1.5 pl-2 pr-1.5 dark:border-base-800" title={`Focusing on: ${liveTask?.title ?? ''}`}>
         <CountdownRing session={live} now={now} size={22} />
         <span className="text-sm font-semibold tabular-nums">{formatClock(live.startedAt + live.durationMin * 60_000 - now)}</span>
-        <button type="button" onClick={() => actions.endSession(project.id)} aria-label="End focus session" className="rounded-lg p-1.5 text-base-400 transition hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-800 dark:hover:text-base-200">
+        <button type="button" onClick={() => actions.endSession(project.id)} aria-label="End focus session" className="rounded-lg p-1.5 text-muted transition hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-800 dark:hover:text-base-200">
           <Square className="size-3" />
         </button>
       </div>
@@ -136,11 +138,11 @@ function UnitRow({ unit, index, stepsMode, defaultOpen, projectId, onToggle, onF
       <div className="flex items-start gap-3">
         <Check checked={unit.done} onToggle={() => onToggle(unit)} label={`Mark "${unit.title}" ${unit.done ? 'not done' : 'done'}`} className="mt-0.5" />
         <div className="min-w-0 flex-1">
-          {unit.context && <p className="truncate text-xs text-base-500">{unit.context}</p>}
-          <p className={cn('text-sm font-medium leading-snug transition-colors duration-300', unit.done && 'text-base-400 line-through decoration-base-300 dark:text-base-500 dark:decoration-base-600')}>
+          {unit.context && <p className="truncate text-xs text-muted">{unit.context}</p>}
+          <p className={cn('text-sm font-medium leading-snug transition-colors duration-300', unit.done && 'text-muted line-through decoration-base-300 dark:decoration-base-600')}>
             {unit.title}
           </p>
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-base-500">
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-muted">
             <span className="inline-flex items-center gap-1 tabular-nums">
               <Clock className="size-3" />
               {formatDuration(unit.minutes)}
@@ -161,8 +163,8 @@ function UnitRow({ unit, index, stepsMode, defaultOpen, projectId, onToggle, onF
                   {steps.map((s) => (
                     <li key={s.id} className="flex items-center gap-2.5 text-sm">
                       <Check size="sm" checked={s.done} onToggle={() => actions.setStepsDone(projectId, [s.id], !s.done)} label={`Mark "${s.title}" ${s.done ? 'not done' : 'done'}`} />
-                      <span className={cn('flex-1 transition-colors', s.done ? 'text-base-400 line-through dark:text-base-500' : 'text-base-700 dark:text-base-300')}>{s.title}</span>
-                      <span className="text-xs tabular-nums text-base-400">{s.minutes}m</span>
+                      <span className={cn('flex-1 transition-colors', s.done ? 'text-muted line-through' : 'text-base-700 dark:text-base-300')}>{s.title}</span>
+                      <span className="text-xs tabular-nums text-muted">{s.minutes}m</span>
                     </li>
                   ))}
                 </ul>
@@ -176,7 +178,7 @@ function UnitRow({ unit, index, stepsMode, defaultOpen, projectId, onToggle, onF
             onClick={() => onFocus(unit.taskId)}
             title="Start a focus session on this"
             aria-label={`Start a focus session on "${unit.title}"`}
-            className="grid size-7 shrink-0 place-items-center rounded-lg text-base-400 transition hover:bg-accent-50 hover:text-accent-600 focus:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 dark:hover:bg-accent-500/10 dark:hover:text-accent-300"
+            className="grid size-7 shrink-0 place-items-center rounded-lg text-muted transition hover:bg-accent-50 hover:text-accent-600 focus:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 dark:hover:bg-accent-500/10 dark:hover:text-accent-300"
           >
             <Play className="size-3.5" />
           </button>
@@ -190,7 +192,7 @@ function Parked({ titles }: { titles: string[] }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-3 rounded-xl border border-dashed border-base-200 px-3.5 py-2.5 dark:border-base-800">
-      <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-2 text-left text-sm text-base-500">
+      <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-2 text-left text-sm text-muted">
         <ParkingCircle className="size-4" />
         <span className="flex-1">
           {titles.length} task{titles.length === 1 ? '' : 's'} parked for later. Deadlines unchanged.
@@ -201,7 +203,7 @@ function Parked({ titles }: { titles: string[] }) {
         {open && (
           <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
             {titles.map((title) => (
-              <li key={title} className="truncate pl-6 pt-1.5 text-sm text-base-400">
+              <li key={title} className="truncate pl-6 pt-1.5 text-sm text-muted">
                 {title}
               </li>
             ))}
@@ -225,7 +227,7 @@ function FriedView({ slice, sessionMin, onToggle, onFocus }: { slice: TodaySlice
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={unit.key} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.25 }}>
             <p className="mt-2 text-lg font-semibold leading-snug">{unit.title}</p>
-            <p className="mt-1 text-sm text-base-500 dark:text-base-400">
+            <p className="mt-1 text-sm text-muted">
               Part of “{unit.context}” · about {unit.minutes} min
             </p>
           </motion.div>
@@ -257,7 +259,7 @@ function FriedView({ slice, sessionMin, onToggle, onFocus }: { slice: TodaySlice
 
       {slice.upNext.length > 0 && (
         <div className="mt-3">
-          <button type="button" onClick={() => setPeek((p) => !p)} className="inline-flex items-center gap-1 text-xs font-medium text-base-500 hover:text-base-800 dark:hover:text-base-200">
+          <button type="button" onClick={() => setPeek((p) => !p)} className="inline-flex items-center gap-1 text-xs font-medium text-muted hover:text-base-800 dark:hover:text-base-200">
             {peek ? 'Hide' : 'Peek at'} what's next
             <ChevronDown className={cn('size-3 transition-transform', peek && 'rotate-180')} />
           </button>
@@ -265,7 +267,7 @@ function FriedView({ slice, sessionMin, onToggle, onFocus }: { slice: TodaySlice
             {peek && (
               <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                 {slice.upNext.map((u) => (
-                  <li key={u.key} className="flex items-center gap-2 pt-2 text-sm text-base-400">
+                  <li key={u.key} className="flex items-center gap-2 pt-2 text-sm text-muted">
                     <span className="size-1.5 rounded-full bg-base-300 dark:bg-base-600" />
                     {u.title}
                     <span className="text-xs tabular-nums">· {u.minutes}m</span>
@@ -285,7 +287,7 @@ function AllClear({ nextDate, gentle = false }: { nextDate: string | null; gentl
     <div className="flex flex-col items-center rounded-xl border border-dashed border-base-200 px-4 py-8 text-center dark:border-base-800">
       {gentle ? <Coffee className="size-6 text-accent-500" /> : <PartyPopper className="size-6 text-accent-500" />}
       <p className="mt-2 font-medium">{gentle ? 'Nothing left for today. Go rest.' : "You're clear for today."}</p>
-      <p className="mt-1 text-sm text-base-500">{nextDate ? `Next sub-task is planned for ${formatDate(nextDate, true)}.` : 'Every sub-task in this plan is done.'}</p>
+      <p className="mt-1 text-sm text-muted">{nextDate ? `Next sub-task is planned for ${formatDate(nextDate, true)}.` : 'Every sub-task in this plan is done.'}</p>
     </div>
   );
 }

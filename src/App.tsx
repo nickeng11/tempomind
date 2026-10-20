@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { Header } from './components/Header';
 import { OwnerView } from './components/OwnerView';
 import { SharePage } from './components/SharePage';
@@ -16,6 +16,25 @@ function parseRoute(hash: string): Route {
 }
 
 export default function App() {
+  // Honour the OS "reduce motion" setting for every animation.
+  return (
+    <MotionConfig reducedMotion="user">
+      <a
+        href="#main"
+        onClick={(e) => {
+          e.preventDefault();
+          document.getElementById('main')?.focus();
+        }}
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg dark:focus:bg-base-900"
+      >
+        Skip to content
+      </a>
+      <Routes />
+    </MotionConfig>
+  );
+}
+
+function Routes() {
   const route = parseRoute(useHash());
   const { projects, owner } = useAppState();
   const today = useToday();
@@ -27,7 +46,7 @@ export default function App() {
   return (
     <div className="bg-app-glow min-h-screen">
       <Header view={route.name} />
-      <main className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-7xl px-4 pb-16 outline-none sm:px-6 lg:px-8">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={route.name}

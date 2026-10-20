@@ -23,17 +23,18 @@ export function SharePage({ project, today }: { project: Project | undefined; to
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-3xl space-y-6 px-4 py-8 outline-none">
+        <h1 className="sr-only">{project ? `${project.title}: shared progress` : 'Shared project'}</h1>
         <ViewOnlyNotice />
         {project ? (
           <TeamProjectCard view={toPublicView(project, today, now)} now={now} />
         ) : (
           <Card className="px-6 py-14 text-center">
             <p className="font-semibold">This link doesn't point to an active project.</p>
-            <p className="mt-1 text-sm text-base-500">It may have been removed by its owner.</p>
+            <p className="mt-1 text-sm text-muted">It may have been removed by its owner.</p>
           </Card>
         )}
-        <p className="text-center text-xs text-base-400">Live progress shared from TempoMind</p>
+        <p className="text-center text-xs text-muted">Live progress shared from TempoMind</p>
       </main>
     </div>
   );

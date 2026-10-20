@@ -8,10 +8,13 @@ export function EnergyCard({ energy }: { energy: Energy | null }) {
   return (
     <Card className="p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 className="font-semibold tracking-tight">🔒 My Energy Status (Private)</h2>
-        <p className="text-xs text-base-500">Only you can see this</p>
+        <h2 className="font-semibold tracking-tight">
+          <span aria-hidden="true">🔒 </span>My Energy Status (Private)
+        </h2>
+        <p className="text-xs text-muted">Only you can see this</p>
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4" role="group" aria-label="Energy level">
+
         {ENERGY_LEVELS.map((level) => {
           const meta = ENERGY_META[level];
           const active = energy === level;
@@ -31,11 +34,13 @@ export function EnergyCard({ energy }: { energy: Energy | null }) {
               {active && (
                 <motion.span
                   layoutId="energy-active"
-                  className="absolute inset-0 rounded-xl bg-linear-to-br from-accent-500 to-accent2-600"
+                  className="absolute inset-0 rounded-xl bg-linear-to-br from-accent-600 to-accent2-600"
                   transition={{ type: 'spring', bounce: 0.18, duration: 0.45 }}
                 />
               )}
-              <span className="relative">{meta.emoji}</span>
+              <span className="relative" aria-hidden="true">
+                {meta.emoji}
+              </span>
               <span className="relative leading-tight">{meta.label}</span>
             </button>
           );

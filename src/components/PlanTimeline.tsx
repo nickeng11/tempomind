@@ -19,7 +19,7 @@ export function PlanTimeline({ project, today }: { project: Project; today: stri
     <Card>
       <div className="px-5 pt-5">
         <h2 className="font-semibold tracking-tight">Pacing plan</h2>
-        <p className="mt-0.5 text-sm text-base-500">
+        <p className="mt-0.5 text-sm text-muted">
           {milestones.length} week{milestones.length === 1 ? '' : 's'} · ~{formatHours(totalMin)}
           {project.effort && ` at ${project.effort.hoursPerWeek}h/week`}
           {!!project.effort?.bufferDays && ` · ${project.effort.bufferDays}-day buffer`}
@@ -42,7 +42,7 @@ export function PlanTimeline({ project, today }: { project: Project; today: stri
             <Flag className="size-3" />
           </span>
           <span className="font-semibold">Deadline</span>
-          <span className="text-base-500">{formatDate(project.deadline, true)}</span>
+          <span className="text-muted">{formatDate(project.deadline, true)}</span>
         </li>
       </ol>
     </Card>
@@ -53,7 +53,7 @@ const DOT: Record<MilestoneProgress['status'], string> = {
   done: 'border-transparent bg-linear-to-br from-accent-500 to-accent2-500 text-white',
   current: 'border-accent-500 bg-white text-accent-600 ring-4 ring-accent-500/15 dark:bg-base-900 dark:text-accent-300',
   late: 'border-amber-400 bg-white text-amber-600 dark:bg-base-900 dark:text-amber-300',
-  upcoming: 'border-base-300 bg-white text-base-500 dark:border-base-700 dark:bg-base-900',
+  upcoming: 'border-base-300 bg-white text-muted dark:border-base-700 dark:bg-base-900',
 };
 
 function MilestoneItem({ milestone: m, tasks, open, onToggle, projectId, today }: { milestone: MilestoneProgress; tasks: Task[]; open: boolean; onToggle: () => void; projectId: string; today: string }) {
@@ -67,17 +67,17 @@ function MilestoneItem({ milestone: m, tasks, open, onToggle, projectId, today }
       </span>
       <button type="button" onClick={onToggle} aria-expanded={open} className="w-full text-left">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="text-xs text-base-500">
+          <span className="text-xs text-muted">
             {formatDate(m.startDate)} – {formatDate(m.endDate)}
           </span>
           {m.status === 'current' && <Pill tone="indigo">This week</Pill>}
           {m.status === 'late' && <Pill tone="amber">Running over</Pill>}
-          <ChevronDown className={cn('ml-auto size-4 text-base-400 transition-transform duration-200', open && 'rotate-180')} />
+          <ChevronDown className={cn('ml-auto size-4 text-muted transition-transform duration-200', open && 'rotate-180')} />
         </div>
         <p className="mt-0.5 text-sm font-semibold">{m.title}</p>
         <div className="mt-2 flex items-center gap-3">
-          <ProgressBar size="sm" value={m.percent} />
-          <span className="w-9 shrink-0 text-right text-xs font-medium tabular-nums text-base-500">{m.percent}%</span>
+          <ProgressBar size="sm" value={m.percent} label={`Week ${m.week} progress`} />
+          <span className="w-9 shrink-0 text-right text-xs font-medium tabular-nums text-muted">{m.percent}%</span>
         </div>
       </button>
 
@@ -86,7 +86,7 @@ function MilestoneItem({ milestone: m, tasks, open, onToggle, projectId, today }
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22 }} className="overflow-hidden">
             {days.map((day) => (
               <div key={day} className="mt-3">
-                <p className="mb-1 flex items-center gap-2 text-xs font-medium text-base-500">
+                <p className="mb-1 flex items-center gap-2 text-xs font-medium text-muted">
                   {formatDate(day, true)}
                   {day === today && <Pill tone="indigo">Today</Pill>}
                 </p>
@@ -104,13 +104,13 @@ function MilestoneItem({ milestone: m, tasks, open, onToggle, projectId, today }
                             onToggle={() => actions.setStepsDone(projectId, t.steps.map((s) => s.id), !done)}
                             label={`Mark "${t.title}" ${done ? 'not done' : 'done'}`}
                           />
-                          <span className={cn('flex-1 text-sm transition-colors', done ? 'text-base-400 line-through dark:text-base-500' : 'text-base-700 dark:text-base-300')}>{t.title}</span>
+                          <span className={cn('flex-1 text-sm transition-colors', done ? 'text-muted line-through' : 'text-base-700 dark:text-base-300')}>{t.title}</span>
                           {!done && stepsDone > 0 && (
                             <span className="text-xs tabular-nums text-accent-500">
                               {stepsDone}/{t.steps.length}
                             </span>
                           )}
-                          <span className="text-xs tabular-nums text-base-400">{formatDuration(taskMinutes(t))}</span>
+                          <span className="text-xs tabular-nums text-muted">{formatDuration(taskMinutes(t))}</span>
                         </li>
                       );
                     })}

@@ -5,6 +5,12 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Secondary text. Shades chosen to keep WCAG AA (4.5:1) contrast in both themes. */
+  --color-muted: var(--color-base-500);
+}
+
+.dark {
+  --color-muted: var(--color-base-400);
 }
 
 @layer base {
@@ -20,6 +26,11 @@
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+  /* A clear focus ring for keyboard users (mouse clicks don't trigger it). */
+  :focus-visible {
+    outline: 2px solid var(--color-accent-500);
+    outline-offset: 2px;
   }
 }
 

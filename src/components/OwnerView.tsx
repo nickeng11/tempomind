@@ -68,7 +68,7 @@ export function OwnerView({ projects, owner, today }: { projects: Project[]; own
         <button
           type="button"
           onClick={() => window.confirm('Reset to the demo projects? This replaces your current data.') && actions.resetDemo()}
-          className="inline-flex items-center gap-1.5 text-xs text-base-400 transition hover:text-base-600 dark:hover:text-base-300"
+          className="inline-flex items-center gap-1.5 text-xs text-muted transition hover:text-base-600 dark:hover:text-base-300"
         >
           <RotateCcw className="size-3" /> Reset demo data
         </button>
@@ -100,9 +100,9 @@ function ProjectTabs({ projects, selectedId, onSelect }: { projects: Project[]; 
               type="button"
               onClick={() => window.confirm(`Delete "${p.title}"?`) && actions.deleteProject(p.id)}
               aria-label={`Delete ${p.title}`}
-              className="mr-1 rounded-md p-1 text-base-400 opacity-0 transition hover:text-rose-500 focus:opacity-100 group-hover:opacity-100"
+              className="mr-1 rounded-md p-1.5 text-muted transition hover:text-rose-500 focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
             >
-              <X className="size-3.5" />
+              <X className="size-3.5" aria-hidden="true" />
             </button>
           </div>
         );
@@ -118,14 +118,14 @@ function ProjectHeader({ project, today }: { project: Project; today: string }) 
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{project.title}</h1>
-          <p className="mt-1 text-sm text-base-500">
+          <p className="mt-1 text-sm text-muted">
             Due {formatDate(project.deadline, true)} · {daysLeftLabel(view.daysLeft)}
           </p>
         </div>
         <ShareLinkButton projectId={project.id} />
       </div>
       <div className="mt-4 flex items-center gap-3">
-        <ProgressBar size="lg" value={view.percent} />
+        <ProgressBar size="lg" value={view.percent} label="Project completion" />
         <span className="shrink-0 text-sm font-semibold tabular-nums">{view.percent}%</span>
         <PacePill status={view.paceStatus} deltaMin={view.paceDeltaMin} />
       </div>

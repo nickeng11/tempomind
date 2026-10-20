@@ -38,26 +38,27 @@ export function PalettePicker() {
 
   return (
     <div ref={ref} className="relative">
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-label="Colour scheme" aria-expanded={open} aria-haspopup="menu" className={iconButton}>
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-label="Colour scheme" aria-expanded={open} aria-controls="palette-picker" className={iconButton}>
         <Swatch id={palette} className="size-4.5" />
       </button>
       <AnimatePresence>
         {open && (
           <motion.div
-            role="menu"
+            id="palette-picker"
+            role="group"
+            aria-label="Colour scheme"
             initial={{ opacity: 0, y: -6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.15 }}
             className="absolute right-0 top-11 z-40 w-64 origin-top-right rounded-2xl border border-base-200 bg-white p-1.5 shadow-xl shadow-black/10 dark:border-base-800 dark:bg-base-900"
           >
-            <p className="px-2.5 pb-1.5 pt-1 text-xs font-medium text-base-500">Colour scheme</p>
+            <p className="px-2.5 pb-1.5 pt-1 text-xs font-medium text-muted">Colour scheme</p>
             {PALETTES.map((p) => (
               <button
                 key={p.id}
                 type="button"
-                role="menuitemradio"
-                aria-checked={palette === p.id}
+                aria-pressed={palette === p.id}
                 onClick={() => choose(p.id)}
                 className={cn(
                   'flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors',
@@ -67,9 +68,9 @@ export function PalettePicker() {
                 <Swatch id={p.id} className="size-6" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-medium">{p.name}</span>
-                  <span className="block truncate text-xs text-base-500">{p.description}</span>
+                  <span className="block truncate text-xs text-muted">{p.description}</span>
                 </span>
-                {palette === p.id && <CheckIcon className="size-4 text-accent-600 dark:text-accent-300" />}
+                {palette === p.id && <CheckIcon className="size-4 text-accent-600 dark:text-accent-300" aria-hidden="true" />}
               </button>
             ))}
           </motion.div>
@@ -97,7 +98,7 @@ export function Header({ view }: { view: 'owner' | 'team' }) {
               aria-current={view === id ? 'page' : undefined}
               className={cn(
                 'relative rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                view === id ? 'text-base-900 dark:text-white' : 'text-base-500 hover:text-base-800 dark:hover:text-base-200',
+                view === id ? 'text-base-900 dark:text-white' : 'text-muted hover:text-base-800 dark:hover:text-base-200',
               )}
             >
               {view === id && (

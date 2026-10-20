@@ -19,7 +19,7 @@ import { btnPrimary, Card, cn } from './ui';
 const EXAMPLES = ['Build Q3 Product Roadmap by Nov 15', 'Launch our mobile app beta by Dec 1', 'Write the annual impact report by Dec 11'];
 
 const inputClass =
-  'h-11 w-full rounded-xl border border-base-200 bg-white px-3.5 text-sm outline-none transition placeholder:text-base-400 focus:border-accent-400 focus:ring-4 focus:ring-accent-500/15 disabled:opacity-60 dark:border-base-700 dark:bg-base-900 dark:placeholder:text-base-500';
+  'h-11 w-full rounded-xl border border-base-200 bg-white px-3.5 text-sm outline-none transition placeholder:text-muted focus:border-accent-400 focus:ring-4 focus:ring-accent-500/15 disabled:opacity-60 dark:border-base-700 dark:bg-base-900';
 
 const chipClass =
   'rounded-lg bg-base-100 px-2 py-0.5 font-medium text-base-800 transition hover:bg-accent-50 hover:text-accent-700 dark:bg-base-800 dark:text-base-200 dark:hover:bg-accent-500/15 dark:hover:text-accent-300';
@@ -102,10 +102,10 @@ export function GoalComposer({ today, onCreated, onCancel, showExamples }: { tod
             <h2 className="flex items-center gap-2 font-semibold tracking-tight">
               <Sparkles className="size-4 text-accent-500" /> What big goal are you working toward?
             </h2>
-            <p className="mt-0.5 text-sm text-base-500">TempoMind breaks it into weekly milestones and daily sub-tasks.</p>
+            <p className="mt-0.5 text-sm text-muted">TempoMind breaks it into weekly milestones and daily sub-tasks.</p>
           </div>
           {onCancel && !busy && (
-            <button type="button" onClick={onCancel} aria-label="Close" className="rounded-lg p-1.5 text-base-400 transition hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-800 dark:hover:text-base-200">
+            <button type="button" onClick={onCancel} aria-label="Close" className="rounded-lg p-1.5 text-muted transition hover:bg-base-100 hover:text-base-700 dark:hover:bg-base-800 dark:hover:text-base-200">
               <X className="size-4" />
             </button>
           )}
@@ -141,7 +141,7 @@ export function GoalComposer({ today, onCreated, onCancel, showExamples }: { tod
 
         {hasGoal && !busy && (
           <div className="mt-3 space-y-2.5">
-            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-2 text-sm text-base-500">
+            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-2 text-sm text-muted" aria-live="polite">
               <span>Assuming</span>
               <button type="button" onClick={() => setAdjusting((a) => !a)} className={chipClass}>
                 {EFFORT_SIZES[size].label} effort · ~{EFFORT_SIZES[size].hours}h
@@ -219,15 +219,17 @@ export function GoalComposer({ today, onCreated, onCancel, showExamples }: { tod
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25 }}
+              aria-live="polite"
+              aria-label="Planning progress"
               className="mt-3 space-y-1.5 overflow-hidden text-sm text-base-600 dark:text-base-400"
             >
               {thoughts.map((line, i) => (
                 <motion.li key={i} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} className="flex gap-2">
-                  <CheckIcon className="mt-0.5 size-4 shrink-0 text-emerald-500" />
+                  <CheckIcon className="mt-0.5 size-4 shrink-0 text-emerald-500" aria-hidden="true" />
                   <span>{line}</span>
                 </motion.li>
               ))}
-              <li className="flex items-center gap-2 text-base-400">
+              <li className="flex items-center gap-2 text-muted">
                 <LoaderCircle className="size-4 animate-spin" /> Thinking…
               </li>
             </motion.ul>
@@ -289,7 +291,7 @@ function Segmented<T extends string | number>({ label, options, value, onChange 
   const hint = options.find((o) => o.value === value)?.hint;
   return (
     <div>
-      <p className="mb-1.5 text-xs font-medium text-base-500">{label}</p>
+      <p className="mb-1.5 text-xs font-medium text-muted">{label}</p>
       <div className="flex rounded-lg bg-white p-0.5 shadow-sm ring-1 ring-base-200 dark:bg-base-900 dark:ring-base-800" role="radiogroup" aria-label={label}>
         {options.map((o) => (
           <button
@@ -300,14 +302,14 @@ function Segmented<T extends string | number>({ label, options, value, onChange 
             onClick={() => onChange(o.value)}
             className={cn(
               'flex-1 rounded-md px-2 py-1 text-xs font-semibold transition',
-              o.value === value ? 'bg-linear-to-r from-accent-500 to-accent2-500 text-white shadow-sm' : 'text-base-500 hover:text-base-800 dark:hover:text-base-200',
+              o.value === value ? 'bg-linear-to-r from-accent-600 to-accent2-600 text-white shadow-sm' : 'text-muted hover:text-base-800 dark:hover:text-base-200',
             )}
           >
             {o.label}
           </button>
         ))}
       </div>
-      {hint && <p className="mt-1 text-xs text-base-400">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
     </div>
   );
 }

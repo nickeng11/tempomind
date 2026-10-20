@@ -10,7 +10,7 @@ export function cn(...classes: Array<string | false | null | undefined>) {
 }
 
 export const btnPrimary =
-  'inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-accent-500 to-accent2-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-accent-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50';
+  'inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-accent-600 to-accent2-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-accent-500/20 transition hover:brightness-110 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50';
 
 export const btnSecondary =
   'inline-flex items-center justify-center gap-2 rounded-xl border border-base-200 bg-white px-3.5 py-2 text-sm font-medium text-base-700 transition hover:border-base-300 hover:bg-base-50 active:scale-[0.98] dark:border-base-700 dark:bg-base-900 dark:text-base-200 dark:hover:border-base-600 dark:hover:bg-base-800';
@@ -39,7 +39,7 @@ export function CardHeader({ icon, title, subtitle, action }: { icon?: ReactNode
         )}
         <div className="min-w-0">
           <h2 className="text-[15px] font-semibold tracking-tight">{title}</h2>
-          {subtitle && <p className="mt-0.5 text-sm text-base-500 dark:text-base-400">{subtitle}</p>}
+          {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}
         </div>
       </div>
       {action && <div className="shrink-0">{action}</div>}
@@ -74,9 +74,16 @@ export function PacePill({ status, deltaMin }: { status: PaceStatus; deltaMin: n
 
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
 
-export function ProgressBar({ value, marker, size = 'md', className }: { value: number; marker?: number; size?: 'sm' | 'md' | 'lg'; className?: string }) {
+export function ProgressBar({ value, marker, size = 'md', label = 'Progress', className }: { value: number; marker?: number; size?: 'sm' | 'md' | 'lg'; label?: string; className?: string }) {
   return (
-    <div className={cn('relative w-full rounded-full bg-base-200/80 dark:bg-base-800', size === 'sm' ? 'h-1.5' : size === 'lg' ? 'h-3' : 'h-2', className)}>
+    <div
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(clamp(value))}
+      className={cn('relative w-full rounded-full bg-base-200/80 dark:bg-base-800', size === 'sm' ? 'h-1.5' : size === 'lg' ? 'h-3' : 'h-2', className)}
+    >
       <div
         className="h-full rounded-full bg-linear-to-r from-accent-500 to-accent2-500 transition-[width] duration-700 ease-out"
         style={{ width: `${clamp(value)}%` }}
@@ -101,7 +108,8 @@ export function Check({ checked, onToggle, label, size = 'md', className }: { ch
       aria-label={label}
       onClick={onToggle}
       className={cn(
-        'grid shrink-0 place-items-center rounded-full border-2 transition-all duration-200 active:scale-90',
+        // The ::before layer enlarges the tap target to at least 24px without changing the look.
+        'relative grid shrink-0 place-items-center rounded-full border-2 transition-all duration-200 before:absolute before:-inset-1.5 active:scale-90',
         size === 'md' ? 'size-5' : 'size-4',
         checked
           ? 'border-transparent bg-linear-to-br from-accent-500 to-accent2-500 shadow-sm shadow-accent-500/30'
@@ -142,7 +150,7 @@ export function CountdownRing({ session, now, size = 56, children }: { session: 
   const circumference = 2 * Math.PI * r;
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg viewBox="0 0 100 100" className="size-full -rotate-90">
+      <svg viewBox="0 0 100 100" className="size-full -rotate-90" aria-hidden="true">
         <defs>
           <linearGradient id="tm-ring" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" style={{ stopColor: 'var(--color-accent-500)' }} />
@@ -210,9 +218,12 @@ export function ShareLinkButton({ projectId, compact = false }: { projectId: str
     setTimeout(() => setCopied(false), 1800);
   };
   return (
-    <button type="button" onClick={copy} className={cn(btnSecondary, compact && 'px-2.5')} title="Copy view-only team link">
-      {copied ? <CheckIcon className="size-4 text-emerald-500" /> : <Link2 className="size-4" />}
+    <button type="button" onClick={copy} className={cn(btnSecondary, compact && 'px-2.5')} title="Copy view-only team link" aria-label={compact ? 'Copy view-only team link' : undefined}>
+      {copied ? <CheckIcon className="size-4 text-emerald-500" aria-hidden="true" /> : <Link2 className="size-4" aria-hidden="true" />}
       {!compact && (copied ? 'Link copied' : 'Copy team link')}
+      <span className="sr-only" role="status">
+        {copied ? 'Link copied to clipboard' : ''}
+      </span>
     </button>
   );
 }
