@@ -85,7 +85,7 @@ export function CompleteDialog({ project, open, onCancel, onConfirm }: { project
     >
       <p>Every sub-task is checked off. Confirming will:</p>
       <ul className="list-disc space-y-1 pl-5">
-        <li>Move it to the bottom of your workspace and to Completed Goals</li>
+        <li>Move it to your Completed menu and the Completed Goals page</li>
         <li>Lock it as read-only (untick it later to reopen)</li>
         <li>End any running focus session</li>
       </ul>

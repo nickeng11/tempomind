@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { CircleCheckBig, Lock, PartyPopper, Plus, RotateCcw, X } from 'lucide-react';
+import { ChevronDown, CircleCheckBig, Lock, PartyPopper, Plus, RotateCcw, X } from 'lucide-react';
 import type { OwnerPrivateState, Project } from '../types';
 import { daysLeftLabel, diffDays, formatDate, toISODate } from '../lib/dates';
 import { useRememberedId } from '../lib/hooks';
@@ -34,12 +34,14 @@ export function OwnerView({ projects, completed, owner, today }: { projects: Pro
 
   return (
     <div className="space-y-6 pt-6">
-      {project && (
-        <div className="flex items-center gap-3">
-          <ProjectTabs projects={projects} selectedId={project.id} onSelect={setSelectedId} />
-          {!composing && (
+      {(project || completed.length > 0) && (
+        <div className="flex items-center gap-2 sm:gap-3">
+          {project ? <ProjectTabs projects={projects} selectedId={project.id} onSelect={setSelectedId} /> : <div className="flex-1" />}
+          <CompletedMenu projects={completed} onRequestReopen={setReopening} />
+          {project && !composing && (
             <button type="button" onClick={() => setComposing(true)} className={cn(btnSecondary, 'shrink-0')}>
-              <Plus className="size-4" /> New goal
+              <Plus className="size-4" aria-hidden="true" /> <span className="hidden sm:inline">New goal</span>
+              <span className="sr-only sm:hidden">New goal</span>
             </button>
           )}
         </div>
@@ -77,7 +79,6 @@ export function OwnerView({ projects, completed, owner, today }: { projects: Pro
         </>
       )}
 
-      <CompletedSection projects={completed} onRequestReopen={setReopening} />
       <ReopenDialog
         project={reopening}
         onCancel={() => setReopening(null)}
@@ -100,22 +101,83 @@ export function OwnerView({ projects, completed, owner, today }: { projects: Pro
   );
 }
 
-/** Confirmed-complete goals, locked at the bottom of the workspace. Unticking one reopens it. */
-function CompletedSection({ projects, onRequestReopen }: { projects: Project[]; onRequestReopen: (project: Project) => void }) {
+/** Confirmed-complete goals, tucked into a menu beside the project tabs. Unticking one asks to reopen it. */
+function CompletedMenu({ projects, onRequestReopen }: { projects: Project[]; onRequestReopen: (project: Project) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e: PointerEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setOpen(false);
+      buttonRef.current?.focus();
+    };
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
   if (projects.length === 0) return null;
   const sorted = [...projects].sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
 
-  // A single row of compact items; it scrolls sideways rather than wrapping when there are many.
   return (
-    <ul aria-label="Completed goals (locked, untick to reopen)" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:thin] sm:mx-0 sm:px-0">
-      <AnimatePresence initial={false}>
-        {sorted.map((p) => (
-          <motion.li key={p.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className="shrink-0">
-            <CompletedGoalItem project={p} onRequestReopen={onRequestReopen} />
-          </motion.li>
-        ))}
+    <div ref={ref} className="relative shrink-0">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls="completed-menu"
+        className={cn(btnSecondary, open && 'border-base-300 bg-base-50 dark:border-base-600 dark:bg-base-800')}
+      >
+        <CircleCheckBig className="size-4" aria-hidden="true" />
+        <span className="hidden sm:inline">Completed</span>
+        <span className="tabular-nums text-muted">
+          <span className="sr-only sm:hidden">Completed goals: </span>
+          {projects.length}
+        </span>
+        <ChevronDown className={cn('size-3.5 text-muted transition-transform duration-200', open && 'rotate-180')} aria-hidden="true" />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            id="completed-menu"
+            role="group"
+            aria-label="Completed goals"
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.15 }}
+            className="absolute right-0 top-full z-30 mt-2 w-[min(20rem,calc(100vw-2rem))] origin-top-right rounded-2xl border border-base-200 bg-white p-1.5 shadow-xl shadow-black/10 dark:border-base-800 dark:bg-base-900"
+          >
+            <p className="px-2.5 pb-1.5 pt-1 text-xs font-medium text-muted">Completed goals · locked</p>
+            <ul className="max-h-72 overflow-y-auto">
+              {sorted.map((p) => (
+                <li key={p.id}>
+                  <CompletedGoalItem
+                    project={p}
+                    onRequestReopen={(goal) => {
+                      setOpen(false);
+                      onRequestReopen(goal);
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+            <p className="border-t border-base-100 px-2.5 pb-1 pt-2 text-xs text-muted dark:border-base-800">Untick a goal to make it live again.</p>
+          </motion.div>
+        )}
       </AnimatePresence>
-    </ul>
+    </div>
   );
 }
 
@@ -125,15 +187,14 @@ function CompletedGoalItem({ project, onRequestReopen }: { project: Project; onR
 
   return (
     // Greyed with a grayscale filter (not opacity) so the text keeps its contrast.
-    <label
-      htmlFor={inputId}
-      title={`Completed ${formatDate(completedOn, true)}. Untick to reopen.`}
-      className="flex cursor-pointer items-center gap-2 rounded-xl border border-base-200 bg-base-100/70 py-1.5 pl-3 pr-2.5 text-sm grayscale transition hover:border-base-300 dark:border-base-800 dark:bg-base-900/40 dark:hover:border-base-700"
-    >
+    <label htmlFor={inputId} className="flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 grayscale transition-colors hover:bg-base-100 dark:hover:bg-base-800">
       <Lock className="size-3.5 shrink-0 text-muted" aria-hidden="true" />
-      <span className="max-w-56 truncate font-medium text-base-700 dark:text-base-300">{project.title}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium text-base-700 dark:text-base-300">{project.title}</span>
+        <span className="block text-xs text-muted">Completed {formatDate(completedOn, true)}</span>
+      </span>
       {/* Stays ticked: the change only happens if the owner confirms in the dialog. */}
-      <input id={inputId} type="checkbox" checked onChange={() => onRequestReopen(project)} className="size-4 cursor-pointer accent-base-600" />
+      <input id={inputId} type="checkbox" checked onChange={() => onRequestReopen(project)} className="size-4 shrink-0 cursor-pointer accent-base-600" />
       <span className="sr-only">Completed and locked. Untick to reopen.</span>
     </label>
   );
