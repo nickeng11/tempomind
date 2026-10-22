@@ -6,6 +6,8 @@ TempoMind breaks big goals into a realistic plan, adapts today's work to your en
 
 Built for the **TaskForge** hackathon on Devpost.
 
+**▶ Try it live: [nickeng11.github.io/tempomind](https://nickeng11.github.io/tempomind/)** (runs in your browser with demo data; nothing is sent anywhere)
+
 ![My Workspace on a "Fried" day: one tiny step at a time](docs/screenshots/workspace-fried-day.png)
 
 | Planner with capacity check | Team view (no energy, pace or hours) |
