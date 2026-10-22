@@ -1,4 +1,7 @@
 node_modules
 dist
 *.local
+# Personal notes (e.g. the video script) stay off GitHub
+*.docx
 .DS_Store
+Devpost screenshots/

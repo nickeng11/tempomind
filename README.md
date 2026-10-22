@@ -1,6 +1,16 @@
 # TempoMind
 
-Energy-aware goal pacing. Owners break big goals into weekly milestones and daily sub-tasks, then re-slice each day to match how they actually feel. Teammates get a clean, view-only dashboard of momentum, without ever seeing anyone's energy or burnout state.
+**Plans that fit your energy. Progress your team can see. Feelings that stay yours.**
+
+TempoMind breaks big goals into a realistic plan, adapts today's work to your energy, and keeps your teammates updated, without ever showing them how you're actually feeling.
+
+Built for the **TaskForge** hackathon on Devpost.
+
+![My Workspace on a "Fried" day: one tiny step at a time](docs/screenshots/workspace-fried-day.png)
+
+| Planner with capacity check | Team view (no energy, pace or hours) |
+|---|---|
+| ![The planner flags a goal that won't fit and suggests fixes](docs/screenshots/planner-capacity-check.png) | ![Team progress with live focus session](docs/screenshots/team-view.png) |
 
 ## Run it
 
@@ -12,7 +22,7 @@ npm run build    # type-check + production build
 
 ## Features
 
-- **AI pacing plan:** enter a goal and deadline (dates like "by Nov 15" are detected automatically), then click **Generate Pacing Plan**. The planner classifies the goal (roadmap, product build, writing, learning or general) and produces weekly milestones, daily sub-tasks and micro-steps of 25 minutes or less.
+- **Pacing plan:** enter a goal and deadline (dates like "by Nov 15" are detected automatically), then click **Generate Pacing Plan**. The planner classifies the goal (roadmap, product build, writing, learning or general) and produces weekly milestones, daily sub-tasks and micro-steps of 25 minutes or less.
 - **Effort & capacity check:** the planner guesses how big the goal is (Small ~6h, Medium ~24h, Large ~60h) and uses your hours per week to check it fits before the deadline. If it doesn't, it suggests a later deadline, more hours, or a smaller scope. When there's slack, the last ~15% of the runway is kept as buffer.
 - **🔒 Private energy slicer:** ⚡ High Focus / 🟢 Steady / 🔋 Low Energy / 🔥 Fried re-slice *today's* work (deep-work blocks, ~20-min chunks, or one tiny step at a time). Task dates, milestones and deadlines are never changed.
 - **Focus sessions:** start a timed session from Today; teammates see the task name and a live countdown.
@@ -38,13 +48,18 @@ npm run build    # type-check + production build
 - The public "current task" is always the parent task, never an energy-sized micro-step.
 - The public view carries no pace, hours planned, hours done or projected finish date, so output levels can't be read from it.
 
+## How it was built
+
+Built in VS Code with [Claude Code](https://claude.com/claude-code) as an AI pair programmer, using Vite, React 19, TypeScript, Tailwind CSS v4, Motion and Lucide icons. Accessibility (contrast, keyboard, screen readers, reduced motion) and privacy (energy data never reaching team pages) were checked with automated tests throughout.
+
 ## Demo notes
 
-- The AI call is simulated in `generatePacingPlan()` (`src/lib/planner.ts`) with streamed "thinking" output. To use a real model, replace its body with an API call that returns the same `Project` shape.
+- The planner is a rules-based stand-in for an LLM: `generatePacingPlan()` (`src/lib/planner.ts`) streams its "thinking" like a model would. To use a real model, replace its body with an API call that returns the same `Project` shape.
 - Data is stored in the browser (localStorage), so share links only work within the same browser. **Reset demo data** at the bottom of My Workspace restores four sample goals: one behind with a live focus session, one ahead, one ready to mark complete and one already completed.
 
 ## What's next
 
+- Opt-in AI agents that scan work emails for action items, turn them into to-dos and assign them to the right person's list, so no task slips through the cracks.
 - A backend with sign-in, so share links work for real teammates and energy data is protected server-side.
 - A real LLM behind `generatePacingPlan()`.
 - Learning from actual time spent to calibrate future estimates.
