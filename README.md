@@ -50,6 +50,10 @@ npm run build    # type-check + production build
 - The public "current task" is always the parent task, never an energy-sized micro-step.
 - The public view carries no pace, hours planned, hours done or projected finish date, so output levels can't be read from it.
 
+## Architecture plan
+
+See [plan.md.html](plan.md.html) for the architecture, system diagrams, tech stack choices and roadmap. Download it and open it in a browser to see the diagrams.
+
 ## How it was built
 
 Built in VS Code with [Claude Code](https://claude.com/claude-code) as an AI pair programmer, using Vite, React 19, TypeScript, Tailwind CSS v4, Motion and Lucide icons. Accessibility (contrast, keyboard, screen readers, reduced motion) and privacy (energy data never reaching team pages) were checked with automated tests throughout.
