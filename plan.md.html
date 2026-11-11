@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TempoMind Architecture Plan</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --text: #1c1d21;
+    --muted: #5d6170;
+    --border: #d9dbe1;
+    --accent: #4f46e5;
+    --accent-soft: #eef0ff;
+    --private: #b45309;
+    --private-soft: #fff6e8;
+    --danger: #c2410c;
+    --code-bg: #eff0f3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121317;
+      --surface: #1b1d23;
+      --text: #ecedf0;
+      --muted: #a2a6b3;
+      --border: #343844;
+      --accent: #a5b4fc;
+      --accent-soft: #23264a;
+      --private: #fbbf24;
+      --private-soft: #33270f;
+      --danger: #fb923c;
+      --code-bg: #262932;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121317;
+    --surface: #1b1d23;
+    --text: #ecedf0;
+    --muted: #a2a6b3;
+    --border: #343844;
+    --accent: #a5b4fc;
+    --accent-soft: #23264a;
+    --private: #fbbf24;
+    --private-soft: #33270f;
+    --danger: #fb923c;
+    --code-bg: #262932;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 920px; margin: 0 auto; padding: 48px 16px 64px; }
+  header { margin-bottom: 40px; }
+  .eyebrow { color: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; margin: 8px 0 12px; }
+  .lede { color: var(--muted); font-size: 18px; margin: 0; max-width: 60ch; }
+  h2 { font-size: 22px; margin: 48px 0 8px; display: flex; gap: 12px; align-items: baseline; }
+  h2 .num { color: var(--accent); font-variant-numeric: tabular-nums; }
+  p, li { max-width: 70ch; }
+  a { color: var(--accent); }
+  code { font: 13px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+
+  figure { margin: 20px 0; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; }
+  figure svg { display: block; width: 100%; min-width: 640px; height: auto; }
+  figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; }
+
+  .node rect, .node path, .node ellipse { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; }
+  .node.accent rect { fill: var(--accent-soft); stroke: var(--accent); }
+  .node.private rect, .node.private path, .node.private ellipse { fill: var(--private-soft); stroke: var(--private); }
+  .t { fill: var(--text); font: 600 14px system-ui, -apple-system, "Segoe UI", sans-serif; text-anchor: middle; }
+  .s { fill: var(--muted); font: 12px system-ui, -apple-system, "Segoe UI", sans-serif; text-anchor: middle; }
+  .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+  .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+  .arrowhead { fill: var(--muted); }
+  .panel { fill: none; stroke-width: 1.5; stroke-dasharray: 6 5; }
+  .panel.private { stroke: var(--private); }
+  .panel.shared { stroke: var(--accent); }
+  .panel-title { font: 700 12px system-ui, sans-serif; letter-spacing: .08em; }
+  .panel-title.private { fill: var(--private); }
+  .panel-title.shared { fill: var(--accent); }
+  .blocked { stroke: var(--danger); stroke-width: 2; fill: none; }
+  .blocked.dash { stroke-dasharray: 5 4; }
+  .blocked-label { fill: var(--danger); font: 600 12px system-ui, sans-serif; text-anchor: middle; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  tr:last-child td { border-bottom: 0; }
+
+  ul.points { padding-left: 20px; }
+  ul.points li { margin: 6px 0; }
+  ol.roadmap { list-style: none; padding: 0; counter-reset: step; }
+  ol.roadmap li { counter-increment: step; position: relative; padding: 10px 0 10px 44px; border-bottom: 1px solid var(--border); }
+  ol.roadmap li:last-child { border-bottom: 0; }
+  ol.roadmap li::before {
+    content: counter(step); position: absolute; left: 0; top: 9px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    font-weight: 700; font-size: 14px; display: grid; place-items: center;
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">TaskForge hackathon · Architecture plan</div>
+    <h1>TempoMind</h1>
+    <p class="lede">TempoMind turns a big goal into a paced plan, resizes today's work to the owner's energy, and shares progress with a team without ever exposing how the owner feels. This page covers how it's built today and where it goes next.</p>
+    <p><a href="https://nickeng11.github.io/tempomind/">Try the live demo</a></p>
+  </header>
+
+  <section>
+    <h2><span class="num">1</span> Current architecture</h2>
+    <p>A single-page app with no server. Everything runs in the browser and is hosted as static files on GitHub Pages.</p>
+    <figure>
+      <svg viewBox="0 0 820 584" role="img" aria-labelledby="d1-title">
+        <title id="d1-title">Hash router sends users to four pages, which use the planner, energy slicer and public view, and all read and write one store backed by two localStorage keys.</title>
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L10,5 L0,10 Z"/></marker>
+        </defs>
+
+        <g marker-end="url(#a1)">
+          <path class="edge" d="M410,54 L410,84"/>
+          <path class="edge" d="M360,136 L100,180"/>
+          <path class="edge" d="M395,136 L305,180"/>
+          <path class="edge" d="M425,136 L510,180"/>
+          <path class="edge" d="M460,136 L715,180"/>
+          <path class="edge" d="M65,236 L65,290"/>
+          <path class="edge" d="M175,236 L205,290"/>
+          <path class="edge" d="M560,236 L590,290"/>
+          <path class="edge" d="M660,236 L640,290"/>
+          <path class="edge" d="M135,236 L135,400"/>
+          <path class="edge" d="M305,236 L305,400"/>
+          <path class="edge" d="M480,236 L480,400"/>
+          <path class="edge" d="M760,236 L760,400"/>
+          <path class="edge" d="M250,456 L250,500"/>
+          <path class="edge" d="M570,456 L570,500"/>
+        </g>
+
+        <g class="node"><rect x="335" y="10" width="150" height="44" rx="10"/><text class="t" x="410" y="37">Owner or teammate</text></g>
+        <g class="node"><rect x="310" y="84" width="200" height="52" rx="10"/><text class="t" x="410" y="106">Hash router</text><text class="s mono" x="410" y="124">App.tsx</text></g>
+
+        <g class="node accent"><rect x="10" y="180" width="180" height="56" rx="10"/><text class="t" x="100" y="202">My Workspace</text><text class="s mono" x="100" y="220">OwnerView</text></g>
+        <g class="node"><rect x="215" y="180" width="180" height="56" rx="10"/><text class="t" x="305" y="202">Collaborator link</text><text class="s mono" x="305" y="220">#/collab/:code</text></g>
+        <g class="node"><rect x="420" y="180" width="180" height="56" rx="10"/><text class="t" x="510" y="202">Team View</text><text class="s mono" x="510" y="220">TeamView</text></g>
+        <g class="node"><rect x="625" y="180" width="180" height="56" rx="10"/><text class="t" x="715" y="202">View-only link</text><text class="s mono" x="715" y="220">#/share/:code</text></g>
+
+        <g class="node"><rect x="10" y="290" width="110" height="56" rx="10"/><text class="t" x="65" y="312">Planner</text><text class="s mono" x="65" y="330">planner.ts</text></g>
+        <g class="node private"><rect x="150" y="290" width="110" height="56" rx="10"/><text class="t" x="205" y="312">Energy slicer</text><text class="s mono" x="205" y="330">energy.ts</text></g>
+        <g class="node"><rect x="532" y="290" width="160" height="56" rx="10"/><text class="t mono" x="612" y="312">toPublicView()</text><text class="s mono" x="612" y="330">metrics.ts</text></g>
+
+        <g class="node accent"><rect x="10" y="400" width="800" height="56" rx="10"/><text class="t" x="410" y="422">Store · store.ts</text><text class="s" x="410" y="440">one external store (useSyncExternalStore), synced live across tabs</text></g>
+
+        <g class="node">
+          <path d="M140,508 L140,564 A110,8 0 0 0 360,564 L360,508"/><ellipse cx="250" cy="508" rx="110" ry="8"/>
+          <text class="t mono" x="250" y="540" style="font-size:12px">tempomind.projects.v1</text><text class="s" x="250" y="558">shared with team pages</text>
+        </g>
+        <g class="node private">
+          <path d="M460,508 L460,564 A110,8 0 0 0 680,564 L680,508"/><ellipse cx="570" cy="508" rx="110" ry="8"/>
+          <text class="t mono" x="570" y="540" style="font-size:12px">tempomind.owner-private.v1</text><text class="s" x="570" y="558">owner only, resets daily</text>
+        </g>
+      </svg>
+      <figcaption>Every page reads and writes the one store. Amber marks anything that holds private energy data.</figcaption>
+    </figure>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Module</th><th>Job</th></tr></thead>
+        <tbody>
+          <tr><td><code>planner.ts</code></td><td>Classifies the goal, sizes the effort, checks capacity against the deadline, and builds milestones, tasks and 25-minute micro-steps. A rules-based stand-in for an LLM.</td></tr>
+          <tr><td><code>energy.ts</code></td><td>Re-slices <em>today's</em> work only (deep work, 20-minute chunks, or one step at a time). Never moves dates.</td></tr>
+          <tr><td><code>metrics.ts</code></td><td>Progress, pace and <code>toPublicView()</code>, the only shape team pages render.</td></tr>
+          <tr><td><code>store.ts</code></td><td>One external store, two storage keys, and live sync across tabs via the <code>storage</code> event.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Privacy boundary</h2>
+    <p>The key design rule: energy data and the team never meet.</p>
+    <figure>
+      <svg viewBox="0 0 820 320" role="img" aria-labelledby="d2-title">
+        <title id="d2-title">Energy check-ins stay inside the owner-only area and are never sent to the shared area, where projects feed the collaborator link and, through toPublicView, the team view.</title>
+        <defs>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L10,5 L0,10 Z"/></marker>
+        </defs>
+
+        <rect class="panel private" x="10" y="10" width="280" height="296" rx="14"/>
+        <text class="panel-title private" x="30" y="40">OWNER ONLY</text>
+        <rect class="panel shared" x="370" y="10" width="440" height="296" rx="14"/>
+        <text class="panel-title shared" x="390" y="40">SHARED</text>
+
+        <g marker-end="url(#a2)">
+          <path class="edge" d="M145,126 L145,200"/>
+          <path class="edge" d="M570,98 L610,98"/>
+          <path class="edge" d="M480,126 L480,200"/>
+          <path class="edge" d="M570,228 L610,228"/>
+        </g>
+
+        <path class="blocked dash" d="M260,98 L318,98"/>
+        <path class="blocked" d="M322,90 L338,106 M338,90 L322,106"/>
+        <text class="blocked-label" x="330" y="128">never sent</text>
+
+        <g class="node private"><rect x="30" y="70" width="230" height="56" rx="10"/><text class="t" x="145" y="92">Energy check-in</text><text class="s" x="145" y="110">resets daily</text></g>
+        <g class="node private"><rect x="30" y="200" width="230" height="56" rx="10"/><text class="t" x="145" y="222">Today slice</text><text class="s" x="145" y="240">energy-sized micro-steps</text></g>
+
+        <g class="node"><rect x="390" y="70" width="180" height="56" rx="10"/><text class="t" x="480" y="92">Projects</text><text class="s" x="480" y="110">tasks, milestones, sessions</text></g>
+        <g class="node"><rect x="610" y="70" width="180" height="56" rx="10"/><text class="t" x="700" y="92">Collaborator link</text><text class="s" x="700" y="110">one goal, tick tasks off</text></g>
+        <g class="node accent"><rect x="390" y="200" width="180" height="56" rx="10"/><text class="t mono" x="480" y="222">toPublicView()</text><text class="s" x="480" y="240">% done, task, countdown</text></g>
+        <g class="node"><rect x="610" y="200" width="180" height="56" rx="10"/><text class="t" x="700" y="222">Team view</text><text class="s" x="700" y="240">and view-only links</text></g>
+      </svg>
+    </figure>
+    <ul class="points">
+      <li>Team pages receive projects only, never the owner's private state.</li>
+      <li>Pace, hours worked and projected finish date are left out, since output levels can hint at energy.</li>
+      <li>The public "current task" is always the parent task, never an energy-sized micro-step.</li>
+      <li>Each goal has two random 128-bit link codes (view and collab), and neither is its internal id.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Tech stack</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Choice</th><th>Why</th><th>Alternatives</th></tr></thead>
+        <tbody>
+          <tr><td>UI</td><td>React 19</td><td>Largest ecosystem; hooks suit a state-driven app</td><td>Vue, Svelte</td></tr>
+          <tr><td>Language</td><td>TypeScript 5.9</td><td>Catches shape mistakes, like leaking private fields, at build time</td><td>JavaScript</td></tr>
+          <tr><td>Build</td><td>Vite 7</td><td>Instant dev server and small static output</td><td>Next.js (its best features need a server)</td></tr>
+          <tr><td>Styling</td><td>Tailwind CSS v4</td><td>Fast to theme; five generated palettes, all WCAG AA</td><td>CSS Modules</td></tr>
+          <tr><td>Motion &amp; icons</td><td>Motion, Lucide</td><td>Respects "reduce motion"; light, consistent icons</td><td>Framer Motion, Heroicons</td></tr>
+          <tr><td>Storage</td><td>localStorage</td><td>No backend needed for a demo</td><td>IndexedDB</td></tr>
+          <tr><td>Hosting</td><td>GitHub Pages</td><td>Free static hosting straight from the repo</td><td>Vercel, Netlify</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Target architecture</h2>
+    <p>Where the app goes after the hackathon: a real backend, a real model, and teammates on their own devices.</p>
+    <figure>
+      <svg viewBox="0 0 820 350" role="img" aria-labelledby="d3-title">
+        <title id="d3-title">The React app signs in through Auth and talks to a serverless API layer, which connects to PostgreSQL, an owner-private table with row-level security, an LLM API and a realtime channel. An opt-in email agent also feeds the API.</title>
+        <defs>
+          <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L10,5 L0,10 Z"/></marker>
+        </defs>
+
+        <g marker-end="url(#a3)">
+          <path class="edge" d="M95,150 L95,76"/>
+          <path class="edge" d="M180,178 L300,178"/>
+          <path class="edge" d="M490,166 L610,38"/>
+          <path class="edge" d="M490,174 L610,128"/>
+          <path class="edge" d="M490,182 L610,218"/>
+          <path class="edge" d="M490,190 L610,308"/>
+          <path class="edge" d="M180,318 L300,318"/>
+          <path class="edge" d="M395,290 L395,206"/>
+        </g>
+
+        <g class="node"><rect x="10" y="20" width="170" height="56" rx="10"/><text class="t" x="95" y="42">Auth</text><text class="s" x="95" y="60">sign-in</text></g>
+        <g class="node accent"><rect x="10" y="150" width="170" height="56" rx="10"/><text class="t" x="95" y="172">React app</text><text class="s" x="95" y="190">hosted on Vercel</text></g>
+        <g class="node accent"><rect x="300" y="150" width="190" height="56" rx="10"/><text class="t" x="395" y="172">API layer</text><text class="s" x="395" y="190">serverless, holds API keys</text></g>
+
+        <g class="node"><rect x="610" y="10" width="200" height="56" rx="10"/><text class="t" x="710" y="32">PostgreSQL</text><text class="s" x="710" y="50">projects table</text></g>
+        <g class="node private"><rect x="610" y="100" width="200" height="56" rx="10"/><text class="t" x="710" y="122">Owner-private table</text><text class="s" x="710" y="140">row-level security</text></g>
+        <g class="node"><rect x="610" y="190" width="200" height="56" rx="10"/><text class="t" x="710" y="212">LLM API</text><text class="s" x="710" y="230">generates pacing plans</text></g>
+        <g class="node"><rect x="610" y="280" width="200" height="56" rx="10"/><text class="t" x="710" y="302">Realtime channel</text><text class="s" x="710" y="320">live team updates</text></g>
+
+        <g class="node"><rect x="10" y="290" width="170" height="56" rx="10"/><text class="t" x="95" y="312">Work email</text><text class="s" x="95" y="330">opt-in</text></g>
+        <g class="node"><rect x="300" y="290" width="190" height="56" rx="10"/><text class="t" x="395" y="312">Email agent</text><text class="s" x="395" y="330">extracts action items</text></g>
+      </svg>
+    </figure>
+    <ul class="points">
+      <li><strong>Real LLM planner:</strong> replace the body of <code>generatePacingPlan()</code> with an API call that returns the same <code>Project</code> shape, so the UI doesn't change. The API key stays on the server.</li>
+      <li><strong>Database:</strong> PostgreSQL (for example Supabase) with row-level security, so energy data is protected on the server, not just by which props a component receives.</li>
+      <li><strong>Realtime:</strong> share links work across devices for real teammates, not only in other tabs of one browser.</li>
+      <li><strong>Agents:</strong> opt-in email scanning turns action items into to-dos on the right person's list.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Roadmap</h2>
+    <ol class="roadmap">
+      <li>Backend with sign-in and PostgreSQL; move both storage keys into tables.</li>
+      <li>Swap the rules-based planner for an LLM, keeping the same output type.</li>
+      <li>Realtime team view and collaborator links across devices.</li>
+      <li>Learn from actual time spent to calibrate effort estimates.</li>
+      <li>Opt-in email agent for action items.</li>
+    </ol>
+  </section>
+</main>
+</body>
+</html>
